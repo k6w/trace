@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+*.tsbuildinfo
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.log
+.env
+.env.local
+.env.development
+.env.production
+bun.lock
+bun.lockb
