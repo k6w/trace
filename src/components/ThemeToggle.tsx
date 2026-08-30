@@ -10,7 +10,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       type="button"
       onClick={toggle}
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-      className={`relative grid h-8 w-8 place-items-center rounded-md text-foreground/80 hover:text-foreground hover:bg-muted/60 transition-colors ${className}`}
+      className={`relative grid h-8 w-8 place-items-center border border-transparent text-foreground/80 transition-colors hover:border-border hover:text-foreground ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isDark ? (

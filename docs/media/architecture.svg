@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" width="1000" height="330" role="img" aria-label="Trace's data flow: a HAR file is read by the File API, parsed, normalized and rendered entirely inside the browser tab. Nothing is uploaded.">
+  <title>Where the data goes</title>
+  <desc>A .har file on disk is read through the File API, parsed as HAR 1.2, normalized into entries and rendered as a virtualized waterfall — all four steps inside a single browser tab. The path to any server is struck through: zero bytes are uploaded.</desc>
+
+  <style>
+    .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .dim  { fill: #8A8A93; }
+    .box  { fill: none; stroke: #8A8A93; stroke-opacity: .55; stroke-width: 1.5; }
+    .flow { stroke: #F5CF3A; stroke-width: 1.5; fill: none; }
+    .dash { fill: none; stroke: #8A8A93; stroke-opacity: .45; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .dead { stroke: #8A8A93; stroke-opacity: .45; stroke-width: 1.5; fill: none; }
+  </style>
+
+  <defs>
+    <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L9,5 L0,9 z" fill="#F5CF3A"/>
+    </marker>
+  </defs>
+
+  <text class="mono dim" x="50" y="36" font-size="13" letter-spacing="2.2">WHERE YOUR CAPTURE GOES</text>
+  <line x1="50" y1="52" x2="950" y2="52" stroke="#8A8A93" stroke-opacity=".3" stroke-width="1"/>
+
+  <!-- Everything inside this boundary runs in the tab. -->
+  <rect class="dash" x="40" y="76" width="920" height="132" />
+  <text class="mono dim" x="56" y="98" font-size="10" letter-spacing="2">ONE BROWSER TAB</text>
+
+  <g class="box">
+    <rect x="64"  y="112" width="190" height="66"/>
+    <rect x="288" y="112" width="190" height="66"/>
+    <rect x="512" y="112" width="190" height="66"/>
+    <rect x="736" y="112" width="190" height="66"/>
+  </g>
+
+  <g class="mono" font-size="12" letter-spacing="1.4" fill="#A9A9B4" text-anchor="middle">
+    <text x="159" y="140">DROP .HAR</text>
+    <text x="383" y="140">PARSE</text>
+    <text x="607" y="140">NORMALIZE</text>
+    <text x="831" y="140">RENDER</text>
+  </g>
+  <g class="mono dim" font-size="10.5" letter-spacing="1.1" text-anchor="middle">
+    <text x="159" y="160">File API</text>
+    <text x="383" y="160">HAR 1.2 · JSON</text>
+    <text x="607" y="160">entries + phases</text>
+    <text x="831" y="160">virtualized rows</text>
+  </g>
+
+  <g class="flow" marker-end="url(#tip)">
+    <line x1="256" y1="145" x2="284" y2="145"/>
+    <line x1="480" y1="145" x2="508" y2="145"/>
+    <line x1="704" y1="145" x2="732" y2="145"/>
+  </g>
+
+  <!-- The path that is never taken. -->
+  <path class="dead" d="M500,208 L500,252"/>
+  <rect class="box" x="392" y="252" width="216" height="46" stroke-dasharray="4 4"/>
+  <text class="mono dim" x="500" y="272" font-size="12" letter-spacing="1.4" text-anchor="middle">ANY SERVER</text>
+  <text class="mono dim" x="500" y="289" font-size="10.5" letter-spacing="1.1" text-anchor="middle">0 bytes uploaded</text>
+  <g stroke="#C0392B" stroke-width="2.5" stroke-linecap="round">
+    <line x1="486" y1="216" x2="514" y2="244"/>
+    <line x1="514" y1="216" x2="486" y2="244"/>
+  </g>
+
+  <text class="mono dim" x="50" y="318" font-size="11" letter-spacing="1.6">TRACE IS A STATIC PAGE. THERE IS NO BACKEND TO SEND ANYTHING TO.</text>
+  <text class="mono" x="950" y="318" font-size="11" letter-spacing="1.6" text-anchor="end" fill="#D8A800">1 REQUEST: THE PAGE ITSELF</text>
+</svg>

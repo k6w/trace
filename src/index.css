@@ -52,6 +52,30 @@
   --shadow: 4px 4px 0 0 var(--border);
   --shadow-md: 6px 6px 0 0 var(--border);
   --shadow-lg: 10px 10px 0 0 var(--border);
+
+  /* Phase spectrum — see src/lib/phases.ts. Ordered the way a request happens:
+     cool while the connection is built, amber while you wait, green on arrival.
+     Tuned darker here so the bars hold up against the paper background. */
+  --phase-blocked: oklch(0.6200 0.0180 265);
+  --phase-dns:     oklch(0.6000 0.1300 215);
+  --phase-connect: oklch(0.5200 0.1600 268);
+  --phase-ssl:     oklch(0.5500 0.1900 310);
+  --phase-send:    oklch(0.6400 0.1600 45);
+  --phase-wait:    oklch(0.8150 0.1720 92);
+  --phase-receive: oklch(0.5800 0.1500 155);
+
+  /* Resource-type accents. Deliberately quieter than the phase ramp — type is
+     read from its three-letter chip, not from color. */
+  --type-document:   oklch(0.5600 0.0550 60);
+  --type-stylesheet: oklch(0.5400 0.0500 200);
+  --type-script:     oklch(0.5400 0.0550 285);
+  --type-image:      oklch(0.5600 0.0550 20);
+  --type-font:       oklch(0.5400 0.0450 330);
+  --type-media:      oklch(0.5200 0.0450 165);
+  --type-xhr:        oklch(0.5300 0.0500 250);
+  --type-fetch:      oklch(0.5400 0.0500 145);
+  --type-websocket:  oklch(0.5400 0.0500 310);
+  --type-other:      oklch(0.5600 0.0100 265);
 }
 
 .dark {
@@ -91,6 +115,26 @@
   --shadow: 4px 4px 0 0 oklch(0.5000 0 0);
   --shadow-md: 6px 6px 0 0 oklch(0.5000 0 0);
   --shadow-lg: 10px 10px 0 0 oklch(0.5000 0 0);
+
+  /* Phase spectrum, lifted for the dark ground. Same hues, more light. */
+  --phase-blocked: oklch(0.5000 0.0180 265);
+  --phase-dns:     oklch(0.7400 0.1250 215);
+  --phase-connect: oklch(0.6700 0.1600 268);
+  --phase-ssl:     oklch(0.6900 0.1800 310);
+  --phase-send:    oklch(0.7700 0.1550 55);
+  --phase-wait:    oklch(0.8893 0.1777 95.2779);
+  --phase-receive: oklch(0.7600 0.1550 155);
+
+  --type-document:   oklch(0.7400 0.0600 70);
+  --type-stylesheet: oklch(0.7200 0.0550 200);
+  --type-script:     oklch(0.7200 0.0600 285);
+  --type-image:      oklch(0.7300 0.0600 25);
+  --type-font:       oklch(0.7200 0.0500 330);
+  --type-media:      oklch(0.7100 0.0500 165);
+  --type-xhr:        oklch(0.7100 0.0550 250);
+  --type-fetch:      oklch(0.7200 0.0550 145);
+  --type-websocket:  oklch(0.7200 0.0550 310);
+  --type-other:      oklch(0.6000 0.0100 265);
 }
 
 @theme inline {
@@ -111,6 +155,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
@@ -126,6 +171,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-phase-blocked: var(--phase-blocked);
+  --color-phase-dns: var(--phase-dns);
+  --color-phase-connect: var(--phase-connect);
+  --color-phase-ssl: var(--phase-ssl);
+  --color-phase-send: var(--phase-send);
+  --color-phase-wait: var(--phase-wait);
+  --color-phase-receive: var(--phase-receive);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -332,5 +385,33 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@layer utilities {
+  /* Ambient field behind the whole app. A faint amber wash off the top-left,
+     so the near-black ground is not a flat void. Referenced by App.tsx. */
+  .mesh-bg {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 12% -8%, color-mix(in oklch, var(--primary) 9%, transparent), transparent 70%),
+      radial-gradient(ellipse 60% 45% at 92% 4%, color-mix(in oklch, var(--phase-connect) 7%, transparent), transparent 68%);
+    background-attachment: fixed;
+  }
+
+  /* Waterfall rows. Selection is a rail plus a whisper of tint — never a fill,
+     because a filled row hides the timing bar that is the reason for the row. */
+  .row-base { transition: background-color 120ms ease; }
+  .row-base:hover { background-color: color-mix(in oklch, var(--foreground) 6%, transparent); }
+  .row-selected { background-color: color-mix(in oklch, var(--primary) 13%, transparent); }
+  .row-selected:hover { background-color: color-mix(in oklch, var(--primary) 18%, transparent); }
+
+  /* Faint vertical rules behind the timeline column, aligned to the axis ticks.
+     Turns loose bars into a readable score. */
+  .timeline-rules {
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in oklch, var(--muted-foreground) 16%, transparent) 0 1px,
+      transparent 1px var(--rule-step, 12.5%)
+    );
   }
 }

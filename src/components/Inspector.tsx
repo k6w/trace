@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { CaretLeft, CaretRight, X } from '@phosphor-icons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useHar } from '../hooks/useHar'
+import { formatMs, formatStatus, statusColor } from '../lib/format'
 import { Tabs } from '../ui/Tabs'
 import { OverviewTab } from './inspector/OverviewTab'
 import { HeadersTab } from './inspector/HeadersTab'
@@ -52,7 +53,7 @@ export function Inspector() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-40 bg-background/40 backdrop-blur-[2px] lg:bg-transparent"
+            className="fixed inset-0 z-40 bg-background/50 backdrop-blur-[2px] lg:bg-transparent lg:backdrop-blur-none"
             onClick={close}
           />
           <motion.aside
@@ -61,35 +62,46 @@ export function Inspector() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-            className="fixed top-0 right-0 z-50 flex h-[100dvh] w-full lg:w-[560px] xl:w-[620px] flex-col border-l border-border/70 bg-card shadow-2xl"
+            className="fixed top-0 right-0 z-50 flex h-[100dvh] w-full lg:w-[560px] xl:w-[620px] flex-col border-l-2 border-border bg-card"
           >
-            <div className="flex items-center gap-2 px-3 h-12 border-b border-border/70">
+            <div className="flex h-12 items-center gap-2 border-b-2 border-border px-3">
               <button
                 onClick={prev}
                 aria-label="Previous entry"
-                className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                className="grid h-8 w-8 place-items-center border border-transparent text-muted-foreground transition-colors hover:border-border hover:text-foreground"
               >
                 <CaretLeft size={14} />
               </button>
               <button
                 onClick={next}
                 aria-label="Next entry"
-                className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                className="grid h-8 w-8 place-items-center border border-transparent text-muted-foreground transition-colors hover:border-border hover:text-foreground"
               >
                 <CaretRight size={14} />
               </button>
-              <div className="ml-1 truncate font-mono text-[12px] text-muted-foreground tabular flex-1">
-                Entry #{entry.id + 1}
+              <div className="ml-1 flex min-w-0 flex-1 items-center gap-2">
+                <span
+                  className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] tabular"
+                  style={{ color: statusColor(entry.status) }}
+                >
+                  {entry.method} {formatStatus(entry.status)}
+                </span>
+                <span className="truncate font-mono text-[12px] text-foreground">
+                  {entry.pathname === '/' ? entry.host : entry.pathname.split('/').pop() || entry.pathname}
+                </span>
+                <span className="shrink-0 font-mono text-[10px] tabular text-muted-foreground">
+                  {formatMs(entry.totalMs)}
+                </span>
               </div>
               <button
                 onClick={close}
                 aria-label="Close"
-                className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                className="grid h-8 w-8 place-items-center border border-transparent text-muted-foreground transition-colors hover:border-border hover:text-foreground"
               >
                 <X size={14} />
               </button>
             </div>
-            <div className="px-2 border-b border-border/70 overflow-x-auto">
+            <div className="overflow-x-auto border-b-2 border-border px-2">
               <Tabs value={tab} onChange={setTab} items={TABS} />
             </div>
             <div className="flex-1 overflow-auto p-4 md:p-5">

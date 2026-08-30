@@ -3,16 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { parseHar, type NormalizedEntry } from '../../lib/har'
 import { RESOURCE_TYPE_COLOR } from '../../lib/classify'
 import { formatBytes, formatMs, formatStatus, statusColor } from '../../lib/format'
+import { PHASE_COLOR as PHASE_COLORS } from '../../lib/phases'
 
-const PHASE_COLORS = {
-  blocked: 'color-mix(in oklch, var(--muted-foreground) 40%, transparent)',
-  dns: 'var(--chart-5)',
-  connect: 'var(--chart-3)',
-  ssl: 'color-mix(in oklch, var(--primary) 50%, transparent)',
-  send: 'color-mix(in oklch, var(--primary) 70%, transparent)',
-  wait: 'var(--primary)',
-  receive: 'color-mix(in oklch, var(--primary) 88%, transparent)',
-}
 
 export function HeroDemoPreview() {
   const reduce = useReducedMotion()

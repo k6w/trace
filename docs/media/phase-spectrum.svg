@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 320" width="1000" height="320" role="img" aria-label="One HTTP request broken into seven timing phases: blocked, DNS, connect, TLS, send, wait and receive.">
+  <title>The phase spectrum</title>
+  <desc>A single 142 ms request from Trace's sample capture, shown twice: once drawn to scale, once with every phase given equal width so the narrow ones can be labelled. Blocked 1 ms, DNS 8 ms, connect 24 ms, TLS 31 ms, send under 1 ms, wait 70 ms, receive 7 ms.</desc>
+
+  <style>
+    .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .dim  { fill: #8A8A93; }
+    .rule { stroke: #8A8A93; stroke-opacity: .3; }
+  </style>
+
+  <text class="mono dim" x="50" y="38" font-size="13" letter-spacing="2.2">GET  ACME.STUDIO/ARTICLES/TEN-THOUSAND-PAPER-LANTERNS</text>
+  <text class="mono" x="950" y="38" font-size="13" letter-spacing="2.2" text-anchor="end" fill="#A9A9B4">142 MS</text>
+  <line class="rule" x1="50" y1="54" x2="950" y2="54" stroke-width="1"/>
+
+  <!-- Drawn to scale. Widths are the real timings from public/sample.har, which
+       is exactly the problem: three of the seven phases are hair-thin. -->
+  <text class="mono dim" x="50" y="86" font-size="10" letter-spacing="2">AS IT HAPPENED</text>
+  <rect x="50"    y="98" width="6.3"   height="30" fill="#6E6E78"/>
+  <rect x="56.3"  y="98" width="50.8"  height="30" fill="#3FBDDA"/>
+  <rect x="107.1" y="98" width="152.3" height="30" fill="#7C71EE"/>
+  <rect x="259.4" y="98" width="196.8" height="30" fill="#C173E6"/>
+  <rect x="456.2" y="98" width="5.1"   height="30" fill="#F0913F"/>
+  <rect x="461.3" y="98" width="444.3" height="30" fill="#F5CF3A"/>
+  <rect x="905.6" y="98" width="44.4"  height="30" fill="#45CE93"/>
+
+  <!-- Same seven phases, same order, equal widths — so every one gets a name. -->
+  <text class="mono dim" x="50" y="176" font-size="10" letter-spacing="2">PHASE BY PHASE</text>
+  <g>
+    <rect x="50"    y="188" width="126.6" height="18" fill="#6E6E78"/>
+    <rect x="180.9" y="188" width="126.6" height="18" fill="#3FBDDA"/>
+    <rect x="311.7" y="188" width="126.6" height="18" fill="#7C71EE"/>
+    <rect x="442.6" y="188" width="126.6" height="18" fill="#C173E6"/>
+    <rect x="573.4" y="188" width="126.6" height="18" fill="#F0913F"/>
+    <rect x="704.3" y="188" width="126.6" height="18" fill="#F5CF3A"/>
+    <rect x="835.1" y="188" width="126.6" height="18" fill="#45CE93"/>
+  </g>
+  <g class="mono" font-size="12" letter-spacing="1.6">
+    <text x="50"    y="228" fill="#6E6E78">BLOCKED</text>
+    <text x="180.9" y="228" fill="#3FBDDA">DNS</text>
+    <text x="311.7" y="228" fill="#7C71EE">CONNECT</text>
+    <text x="442.6" y="228" fill="#C173E6">TLS</text>
+    <text x="573.4" y="228" fill="#F0913F">SEND</text>
+    <text x="704.3" y="228" fill="#F5CF3A">WAIT</text>
+    <text x="835.1" y="228" fill="#45CE93">RECEIVE</text>
+  </g>
+  <g class="mono dim" font-size="11" letter-spacing="1.2">
+    <text x="50"    y="246">1 ms</text>
+    <text x="180.9" y="246">8 ms</text>
+    <text x="311.7" y="246">24 ms</text>
+    <text x="442.6" y="246">31 ms</text>
+    <text x="573.4" y="246">&lt; 1 ms</text>
+    <text x="704.3" y="246">70 ms</text>
+    <text x="835.1" y="246">7 ms</text>
+  </g>
+
+  <line class="rule" x1="50" y1="278" x2="950" y2="278" stroke-width="1"/>
+  <text class="mono dim" x="50" y="300" font-size="11" letter-spacing="1.8">SEVEN PHASES, SEVEN COLORS · COOL WHILE CONNECTING, HOT WHILE WAITING, GREEN ON ARRIVAL</text>
+  <text class="mono" x="950" y="300" font-size="11" letter-spacing="1.8" text-anchor="end" fill="#D8A800">49% WAITING</text>
+</svg>

@@ -45,14 +45,14 @@ export function CodeBlock({ code, mimeType }: Props) {
 
   if (tooLarge && !confirmedLarge) {
     return (
-      <div className="rounded-md border border-border/70 bg-muted/30 p-4 text-[12px] space-y-2">
+      <div className="border border-border/70 bg-muted/30 p-4 text-[12px] space-y-2">
         <div className="font-medium">Large body</div>
         <p className="text-muted-foreground">
           This body is {Math.round(code.length / 1024).toLocaleString()} KB. Highlighting may slow the inspector.
         </p>
         <button
           onClick={() => setConfirmedLarge(true)}
-          className="rounded-md border bg-background px-2.5 py-1 hover:bg-muted/40 transition-colors"
+          className="border bg-background px-2.5 py-1 hover:bg-muted/40 transition-colors"
         >
           Load anyway
         </button>
@@ -82,7 +82,7 @@ export function CodeBlock({ code, mimeType }: Props) {
         </div>
       </div>
       <div
-        className="trace-code rounded-md border border-border/70 overflow-auto max-h-[60vh]"
+        className="trace-code border border-border/70 overflow-auto max-h-[60vh]"
       >
         {html ? (
           <div dangerouslySetInnerHTML={{ __html: html }} />

@@ -30,15 +30,25 @@ export function summarize(entries: NormalizedEntry[]) {
   let totalBytes = 0
   let errors = 0
   let rangeEnd = 0
+  let slowestMs = 0
+  let waitMs = 0
+  let busyMs = 0
   for (const e of entries) {
     totalBytes += e.transferred
     if (e.isError) errors++
     if (e.endMs > rangeEnd) rangeEnd = e.endMs
+    if (e.totalMs > slowestMs) slowestMs = e.totalMs
+    waitMs += e.phases.wait ?? 0
+    busyMs += e.totalMs
   }
   return {
     count: entries.length,
     totalBytes,
     rangeMs: rangeEnd,
     errors,
+    slowestMs,
+    /* Share of all request time spent waiting on a server rather than moving
+       bytes. The single number that says whether the backend is the problem. */
+    waitShare: busyMs > 0 ? waitMs / busyMs : 0,
   }
 }

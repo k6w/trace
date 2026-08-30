@@ -3,15 +3,16 @@ import { useEffect, useRef } from 'react'
 import { useHar } from '../hooks/useHar'
 import { TimeAxis } from './TimeAxis'
 import { WaterfallRow } from './WaterfallRow'
-
-const ROW_HEIGHT = 28
+import { PhaseLegend } from './PhaseLegend'
+import { ROW_HEIGHT, WATERFALL_GAP, WATERFALL_GRID } from './waterfallGrid'
+import { formatNumber } from '../lib/format'
 
 interface Props {
   reduceMotion: boolean
 }
 
 export function Waterfall({ reduceMotion }: Props) {
-  const { filtered, har, selected, select, next, prev } = useHar()
+  const { filtered, entries, har, selected, select, next, prev } = useHar()
   const rangeStart = 0
   const rangeEnd = har?.meta.rangeEnd ?? 0
 
@@ -23,7 +24,6 @@ export function Waterfall({ reduceMotion }: Props) {
     overscan: 12,
   })
 
-  // Keyboard navigation
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const tgt = e.target as HTMLElement | null
@@ -38,7 +38,6 @@ export function Waterfall({ reduceMotion }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [next, prev, select, selected])
 
-  // Scroll selected into view
   useEffect(() => {
     if (selected == null) return
     const idx = filtered.findIndex((e) => e.id === selected)
@@ -46,42 +45,49 @@ export function Waterfall({ reduceMotion }: Props) {
   }, [selected, filtered, virtualizer])
 
   const virtualEntries = virtualizer.getVirtualItems()
-  const totalSize = virtualizer.getTotalSize()
+  const gridStyle = { gridTemplateColumns: WATERFALL_GRID, columnGap: WATERFALL_GAP }
 
   return (
-    <section className="flex-1 flex flex-col min-h-0">
-      <div className="grid grid-cols-[auto_minmax(0,28px)_minmax(0,1fr)_minmax(0,72px)_minmax(0,84px)_minmax(0,42%)] gap-x-3 px-4 md:px-6 h-7 items-end border-b border-border/70 bg-background/95 backdrop-blur sticky top-0 z-10">
-        <span />
-        <span className="label-eyebrow text-right">Method</span>
-        <span className="label-eyebrow">URL</span>
-        <span className="label-eyebrow text-right">Status</span>
-        <span className="label-eyebrow text-right">Size</span>
-        <span className="relative h-full">
-          <span className="label-eyebrow absolute left-0 top-0">Timeline</span>
-        </span>
+    <section className="flex min-h-0 flex-1 flex-col">
+      {/* Column heads and the time ruler share one grid, so a label can never
+          drift out from over the column it names. */}
+      <div className="sticky top-0 z-10 border-b-2 border-border bg-background">
+        <div
+          className="grid h-6 items-center px-4 md:px-6 pt-1"
+          style={gridStyle}
+        >
+          <span className="label-eyebrow">Type</span>
+          <span className="label-eyebrow text-right">Method</span>
+          <span className="label-eyebrow">URL</span>
+          <span className="label-eyebrow text-right">Code</span>
+          <span className="label-eyebrow text-right">Size</span>
+          <span className="label-eyebrow">Timeline</span>
+        </div>
+        <div className="grid px-4 md:px-6" style={gridStyle}>
+          <span /><span /><span /><span /><span />
+          <TimeAxis rangeStart={rangeStart} rangeEnd={rangeEnd} className="w-full" />
+        </div>
       </div>
-      <div
-        className="grid grid-cols-[auto_minmax(0,28px)_minmax(0,1fr)_minmax(0,72px)_minmax(0,84px)_minmax(0,42%)] gap-x-3 px-4 md:px-6 sticky top-7 z-10 bg-background/95 backdrop-blur border-b border-border/70"
-      >
-        <span /><span /><span /><span /><span />
-        <TimeAxis rangeStart={rangeStart} rangeEnd={rangeEnd} className="w-full" />
-      </div>
-      <div ref={scrollRef} className="flex-1 overflow-auto relative">
+
+      <div ref={scrollRef} className="relative flex-1 overflow-auto">
         {filtered.length === 0 ? (
-          <div className="grid place-items-center h-full p-8">
-            <div className="text-center">
-              <div className="label-eyebrow mb-2">No matching entries</div>
-              <p className="text-sm text-muted-foreground max-w-xs">Try clearing filters or adjusting the time range.</p>
+          <div className="grid h-full place-items-center p-8">
+            <div className="max-w-xs text-center">
+              <div className="label-eyebrow-strong mb-2">Nothing matches</div>
+              <p className="font-mono text-[12px] leading-relaxed text-muted-foreground">
+                {entries.length} requests are loaded. Clear a filter or widen the time
+                window to bring them back.
+              </p>
             </div>
           </div>
         ) : (
-          <div style={{ height: totalSize, position: 'relative' }}>
+          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
             {virtualEntries.map((vi) => {
               const entry = filtered[vi.index]
               return (
                 <div
                   key={entry.id}
-                  className="absolute top-0 left-0 right-0 border-b border-border/30"
+                  className="absolute inset-x-0 top-0 border-b border-border-soft"
                   style={{ transform: `translateY(${vi.start}px)`, height: vi.size }}
                 >
                   <WaterfallRow
@@ -98,6 +104,18 @@ export function Waterfall({ reduceMotion }: Props) {
             })}
           </div>
         )}
+      </div>
+
+      {/* The key to the spectrum, parked where it is always in view. */}
+      <div className="flex items-center justify-between gap-6 border-t-2 border-border bg-background px-4 md:px-6 py-2">
+        <PhaseLegend />
+        <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] tabular text-muted-foreground">
+          {formatNumber(filtered.length)}
+          {filtered.length !== entries.length && (
+            <span className="text-muted-foreground/60"> / {formatNumber(entries.length)}</span>
+          )}
+          {' '}shown
+        </span>
       </div>
     </section>
   )

@@ -2,6 +2,7 @@ import { motion, useInView, useReducedMotion } from 'motion/react'
 import { useRef } from 'react'
 import { ArrowRight, Command, Eye, Funnel, Globe } from '@phosphor-icons/react'
 import { SectionIndex } from '../../ui/Brutal'
+import { PHASE_COLOR as PHASE_COLORS } from '../../lib/phases'
 
 export function FeatureTriptych() {
   const ref = useRef<HTMLDivElement>(null)
@@ -124,12 +125,6 @@ function PanelFoot({ items, dense }: { items: React.ReactNode[]; dense?: boolean
   )
 }
 
-const PHASE_COLORS = {
-  blocked: 'color-mix(in oklch, var(--muted-foreground) 40%, transparent)',
-  send: 'color-mix(in oklch, var(--primary) 70%, transparent)',
-  wait: 'var(--primary)',
-  receive: 'color-mix(in oklch, var(--primary) 88%, transparent)',
-}
 
 function WaterfallMock() {
   const rows = [

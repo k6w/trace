@@ -5,16 +5,8 @@ import { RESOURCE_TYPE_COLOR, RESOURCE_TYPE_LABELS, type ResourceType } from '..
 import { formatBytes, formatMs, formatNumber, formatStatus, statusColor, statusBucket } from '../../lib/format'
 import { ArrowDownRight, MagnifyingGlass } from '@phosphor-icons/react'
 import { BrutalButton, SectionIndex, Tag } from '../../ui/Brutal'
+import { PHASE_COLOR as PHASE_COLORS } from '../../lib/phases'
 
-const PHASE_COLORS = {
-  blocked: 'color-mix(in oklch, var(--muted-foreground) 40%, transparent)',
-  dns: 'var(--chart-5)',
-  connect: 'var(--chart-3)',
-  ssl: 'color-mix(in oklch, var(--primary) 50%, transparent)',
-  send: 'color-mix(in oklch, var(--primary) 70%, transparent)',
-  wait: 'var(--primary)',
-  receive: 'color-mix(in oklch, var(--primary) 88%, transparent)',
-}
 
 interface Props {
   onLoadSample: () => void

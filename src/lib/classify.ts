@@ -71,14 +71,14 @@ export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
 }
 
 export const RESOURCE_TYPE_COLOR: Record<ResourceType, string> = {
-  document: 'var(--primary)',
-  script: 'var(--chart-2)',
-  stylesheet: 'var(--chart-3)',
-  image: 'var(--chart-4)',
-  font: 'var(--muted-foreground)',
-  media: 'oklch(0.55 0.06 180)',
-  xhr: 'var(--chart-5)',
-  fetch: 'var(--chart-5)',
-  websocket: 'oklch(0.55 0.04 250)',
-  other: 'var(--border)',
+  document: 'var(--type-document)',
+  stylesheet: 'var(--type-stylesheet)',
+  script: 'var(--type-script)',
+  image: 'var(--type-image)',
+  font: 'var(--type-font)',
+  media: 'var(--type-media)',
+  xhr: 'var(--type-xhr)',
+  fetch: 'var(--type-fetch)',
+  websocket: 'var(--type-websocket)',
+  other: 'var(--type-other)',
 }
