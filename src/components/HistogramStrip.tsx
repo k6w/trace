@@ -118,7 +118,7 @@ export function HistogramStrip() {
             return (
               <motion.div
                 key={i}
-                className="flex-1 rounded-sm origin-bottom"
+                className="flex-1 origin-bottom"
                 initial={{ scaleY: 0.05 }}
                 animate={{ scaleY: 1 }}
                 transition={{ delay: 0.08 + i * 0.005, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}

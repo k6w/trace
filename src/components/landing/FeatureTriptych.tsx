@@ -2,6 +2,8 @@ import { motion, useInView, useReducedMotion } from 'motion/react'
 import { useRef } from 'react'
 import { ArrowRight, Command, Eye, Funnel, Globe } from '@phosphor-icons/react'
 import { SectionIndex } from '../../ui/Brutal'
+import { PHASE_COLOR } from '../../lib/phases'
+import { RESOURCE_TYPE_COLOR, type ResourceType } from '../../lib/classify'
 
 export function FeatureTriptych() {
   const ref = useRef<HTMLDivElement>(null)
@@ -124,24 +126,17 @@ function PanelFoot({ items, dense }: { items: React.ReactNode[]; dense?: boolean
   )
 }
 
-const PHASE_COLORS = {
-  blocked: 'color-mix(in oklch, var(--muted-foreground) 40%, transparent)',
-  send: 'color-mix(in oklch, var(--primary) 70%, transparent)',
-  wait: 'var(--primary)',
-  receive: 'color-mix(in oklch, var(--primary) 88%, transparent)',
-}
 
 function WaterfallMock() {
   const rows = [
-    { method: 'GET', host: 'acme.studio', path: '/articles/lanterns', status: 200, type: 'doc', leading: 0, w: 28 },
-    { method: 'GET', host: 'acme.studio', path: '/_assets/app.f8a21c.css', status: 200, type: 'css', leading: 8, w: 14 },
-    { method: 'GET', host: 'acme.studio', path: '/_assets/app.b7e110.js', status: 200, type: 'js', leading: 9, w: 22 },
+    { method: 'GET', host: 'acme.studio', path: '/articles/lanterns', status: 200, type: 'document', leading: 0, w: 28 },
+    { method: 'GET', host: 'acme.studio', path: '/_assets/app.f8a21c.css', status: 200, type: 'stylesheet', leading: 8, w: 14 },
+    { method: 'GET', host: 'acme.studio', path: '/_assets/app.b7e110.js', status: 200, type: 'script', leading: 9, w: 22 },
     { method: 'GET', host: 'api.acme.studio', path: '/v2/articles/lanterns', status: 200, type: 'fetch', leading: 22, w: 38, tooltip: true },
-    { method: 'GET', host: 'cdn.acme.studio', path: '/img/hero@2x.avif', status: 200, type: 'img', leading: 30, w: 24 },
-    { method: 'GET', host: 'cdn.acme.studio', path: '/img/lantern-detail-3.avif', status: 404, type: 'img', leading: 50, w: 8, error: true },
+    { method: 'GET', host: 'cdn.acme.studio', path: '/img/hero@2x.avif', status: 200, type: 'image', leading: 30, w: 24 },
+    { method: 'GET', host: 'cdn.acme.studio', path: '/img/lantern-detail-3.avif', status: 404, type: 'image', leading: 50, w: 8, error: true },
     { method: 'POST', host: 'api.acme.studio', path: '/v2/comments', status: 502, type: 'fetch', leading: 56, w: 18, error: true },
-  ]
-  const TYPE: Record<string, string> = { doc: 'var(--primary)', css: 'var(--chart-3)', js: 'var(--chart-2)', img: 'var(--chart-4)', fetch: 'var(--chart-5)' }
+  ] satisfies Array<{ type: ResourceType } & Record<string, unknown>>
   return (
     <div className="border-hard-2 bg-background overflow-hidden">
       <div className="h-6 border-b-2 border-border flex items-center px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -152,7 +147,7 @@ function WaterfallMock() {
         {rows.map((r, i) => (
           <div key={i} className={`grid h-7 items-center px-3 text-[11px] ${r.error ? 'bg-destructive/[0.06]' : ''} ${r.tooltip ? 'bg-primary/[0.08]' : ''}`}
             style={{ gridTemplateColumns: 'auto 28px minmax(0,1fr) 32px minmax(0,55%)', columnGap: '8px' }}>
-            <span className="h-2 w-2" style={{ background: TYPE[r.type] }} />
+            <span className="h-2 w-2" style={{ background: RESOURCE_TYPE_COLOR[r.type] }} />
             <span className="font-mono text-[9px] uppercase tabular text-right text-muted-foreground">{r.method}</span>
             <span className="truncate font-mono">
               <span className="text-muted-foreground/80">{r.host}</span>
@@ -164,9 +159,9 @@ function WaterfallMock() {
                 className="absolute top-1/2 -translate-y-1/2 h-2 flex"
                 style={{ left: `${r.leading}%`, width: `${r.w}%` }}
               >
-                <span className="flex-1" style={{ background: PHASE_COLORS.send }} />
-                <span className="flex-1" style={{ background: PHASE_COLORS.wait }} />
-                <span className="flex-1" style={{ background: PHASE_COLORS.receive }} />
+                <span className="flex-1" style={{ background: PHASE_COLOR.send }} />
+                <span className="flex-1" style={{ background: PHASE_COLOR.wait }} />
+                <span className="flex-1" style={{ background: PHASE_COLOR.receive }} />
               </div>
               {r.tooltip && (
                 <span className="absolute -top-1 right-2 border-hard-2 bg-popover px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.18em] z-10 tabular pointer-events-none whitespace-nowrap shadow-hard">

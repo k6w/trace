@@ -7,8 +7,9 @@ interface Props {
 }
 
 export function TimeAxis({ rangeStart, rangeEnd, className = '' }: Props) {
+  const span = Math.max(1, rangeEnd - rangeStart)
+
   const ticks = useMemo(() => {
-    const span = Math.max(1, rangeEnd - rangeStart)
     let step = 100
     if (span > 60_000) step = 10_000
     else if (span > 30_000) step = 5_000
@@ -23,34 +24,36 @@ export function TimeAxis({ rangeStart, rangeEnd, className = '' }: Props) {
     for (let t = 0; t <= span + 0.001; t += step) {
       let label: string
       if (t === 0) label = '0'
-      else if (t < 1000) label = `${Math.round(t)} ms`
-      else label = `${(t / 1000).toFixed(t < 10000 ? 2 : 1)} s`
+      else if (t < 1000) label = `${Math.round(t)}ms`
+      else label = `${(t / 1000).toFixed(t < 10_000 ? 2 : 1)}s`
       out.push({ ms: t, label })
     }
     return out
-  }, [rangeStart, rangeEnd])
-
-  const span = Math.max(1, rangeEnd - rangeStart)
+  }, [span])
 
   return (
-    <div className={`relative h-7 border-b border-border/70 ${className}`}>
-      <div className="absolute inset-0">
-        {ticks.map((t, i) => {
-          const left = (t.ms / span) * 100
-          return (
-            <div
-              key={i}
-              className="absolute top-0 bottom-0 flex flex-col justify-between"
-              style={{ left: `${left}%` }}
+    <div className={`relative h-6 ${className}`}>
+      {ticks.map((t, i) => {
+        const left = (t.ms / span) * 100
+        // Only the tick that actually reaches the right edge would hang off it.
+        // Ticks stop short of the edge whenever the span is not a whole number
+        // of steps, and those must stay left-anchored like every other label.
+        const isLast = left > 97
+        return (
+          <div
+            key={i}
+            className="absolute bottom-0 top-0 flex flex-col justify-between"
+            style={{ left: `${left}%` }}
+          >
+            <span
+              className={`font-mono text-[9px] tabular text-muted-foreground ${isLast ? '-translate-x-full pr-1' : 'pl-1'}`}
             >
-              <span className="font-mono text-[10px] text-muted-foreground tabular pl-1.5 -translate-x-px">
-                {t.label}
-              </span>
-              <span className="block w-px h-1 bg-border/70" />
-            </div>
-          )
-        })}
-      </div>
+              {t.label}
+            </span>
+            <span className="block h-1.5 w-px bg-border" />
+          </div>
+        )
+      })}
     </div>
   )
 }

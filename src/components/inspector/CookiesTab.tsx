@@ -18,7 +18,7 @@ function Section({ title, cookies }: { title: string; cookies: { name: string; v
       {cookies.length === 0 ? (
         <div className="text-[12px] text-muted-foreground italic">None.</div>
       ) : (
-        <div className="border border-border/60 rounded-md overflow-hidden">
+        <div className="border border-border/60 overflow-hidden">
           <table className="w-full text-[12px] font-mono">
             <thead className="bg-muted/30">
               <tr className="text-muted-foreground">

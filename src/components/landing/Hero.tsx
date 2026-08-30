@@ -3,6 +3,7 @@ import { ArrowRight, FileArrowUp, UploadSimple } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import { HeroDemoPreview } from './HeroDemoPreview'
 import { BrutalButton, CornerBrackets, SplitText, TermBadge } from '../../ui/Brutal'
+import { PHASE_COLOR, PHASE_LABEL, PHASE_ORDER } from '../../lib/phases'
 
 interface Props {
   onChooseFile: () => void
@@ -136,24 +137,29 @@ export function Hero({ onChooseFile, onTrySample }: Props) {
             </div>
           </motion.div>
 
-          {/* Footer line — coordinates / serial number feel */}
+          {/* The key to the spectrum. It sits in the hero because the demo panel
+              beside it is already drawing bars in these exact colors. */}
           <motion.div
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4, duration: 0.5 }}
-            className="mt-auto pt-16 grid grid-cols-3 gap-4 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+            className="mt-auto pt-14"
           >
-            <div>
-              <div className="text-foreground font-bold">N. 41.4036</div>
-              <div>parser · client</div>
-            </div>
-            <div>
-              <div className="text-foreground font-bold">E. 12.4964</div>
-              <div>shiki · lazy</div>
-            </div>
-            <div>
-              <div className="text-foreground font-bold">CSV-AAA</div>
-              <div>amber accent</div>
+            <div className="border-t-2 border-border pt-3">
+              <div className="mb-3 flex items-baseline justify-between">
+                <span className="label-eyebrow-strong">Seven phases, seven colors</span>
+                <span className="label-eyebrow hidden sm:inline">left to right, as they happen</span>
+              </div>
+              <div className="grid grid-cols-4 gap-x-4 gap-y-2 sm:grid-cols-7">
+                {PHASE_ORDER.map((p) => (
+                  <div key={p} className="flex flex-col gap-1.5">
+                    <span className="h-1.5 w-full" style={{ background: PHASE_COLOR[p] }} />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                      {PHASE_LABEL[p]}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
         </div>

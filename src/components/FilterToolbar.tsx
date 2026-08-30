@@ -75,8 +75,8 @@ export function FilterToolbar() {
 
         <button
           onClick={() => setErrorsOnly(!filters.errorsOnly)}
-          className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[12px] font-medium transition-colors ${
-            filters.errorsOnly ? 'border-primary text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+          className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
+            filters.errorsOnly ? 'border-destructive bg-destructive text-destructive-foreground' : 'border-border-soft text-muted-foreground hover:border-border hover:text-foreground'
           }`}
         >
           <Warning size={12} weight="regular" />
@@ -100,11 +100,11 @@ export function FilterToolbar() {
             <button
               key={t}
               onClick={() => toggleType(t)}
-              className={`group inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] transition-colors ${
-                active ? 'bg-primary/10 border-primary/60 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              className={`group inline-flex items-center gap-1.5 border px-2 py-1 text-[11px] font-mono uppercase tracking-[0.08em] transition-colors ${
+                active ? 'border-primary bg-primary text-primary-foreground' : 'border-border-soft text-muted-foreground hover:border-border hover:text-foreground'
               }`}
             >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: RESOURCE_TYPE_COLOR[t] }} />
+              <span className="h-2 w-2" style={{ background: RESOURCE_TYPE_COLOR[t] }} />
               {RESOURCE_TYPE_LABELS[t]}
               <span className="font-mono text-[10px] opacity-70 tabular">{count}</span>
             </button>
@@ -119,8 +119,8 @@ export function FilterToolbar() {
             <button
               key={m}
               onClick={() => toggleMethod(m)}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
-                active ? 'bg-primary/10 border-primary/60 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              className={`inline-flex items-center gap-1.5 border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${
+                active ? 'border-primary bg-primary text-primary-foreground' : 'border-border-soft text-muted-foreground hover:border-border hover:text-foreground'
               }`}
             >
               {m}
@@ -137,8 +137,8 @@ export function FilterToolbar() {
             <button
               key={s}
               onClick={() => toggleStatus(s)}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
-                active ? 'bg-primary/10 border-primary/60 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              className={`inline-flex items-center gap-1.5 border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${
+                active ? 'border-primary bg-primary text-primary-foreground' : 'border-border-soft text-muted-foreground hover:border-border hover:text-foreground'
               }`}
             >
               {s}
@@ -182,7 +182,7 @@ function Pill({ children, onRemove }: { children: React.ReactNode; onRemove: () 
   return (
     <motion.span
       layout
-      className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 text-foreground font-mono uppercase tracking-wider"
+      className="inline-flex items-center gap-1.5 border border-border bg-secondary px-2 py-0.5 text-foreground font-mono uppercase tracking-wider"
     >
       {children}
       <button onClick={onRemove} className="text-muted-foreground hover:text-foreground">

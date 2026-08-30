@@ -30,15 +30,24 @@ export function summarize(entries: NormalizedEntry[]) {
   let totalBytes = 0
   let errors = 0
   let rangeEnd = 0
+  let slowestMs = 0
+  let windowStart = Infinity
   for (const e of entries) {
     totalBytes += e.transferred
     if (e.isError) errors++
     if (e.endMs > rangeEnd) rangeEnd = e.endMs
+    if (e.totalMs > slowestMs) slowestMs = e.totalMs
+    if (e.startMs < windowStart) windowStart = e.startMs
   }
   return {
     count: entries.length,
     totalBytes,
     rangeMs: rangeEnd,
     errors,
+    slowestMs,
+    /* Elapsed time across the entries actually being shown. Measured from the
+       first of them rather than from t=0 of the capture, so narrowing the
+       filters narrows this number too. */
+    windowMs: entries.length > 0 ? rangeEnd - windowStart : 0,
   }
 }

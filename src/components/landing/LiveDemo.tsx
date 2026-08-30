@@ -5,16 +5,8 @@ import { RESOURCE_TYPE_COLOR, RESOURCE_TYPE_LABELS, type ResourceType } from '..
 import { formatBytes, formatMs, formatNumber, formatStatus, statusColor, statusBucket } from '../../lib/format'
 import { ArrowDownRight, MagnifyingGlass } from '@phosphor-icons/react'
 import { BrutalButton, SectionIndex, Tag } from '../../ui/Brutal'
+import { PHASE_COLOR, PHASE_ORDER } from '../../lib/phases'
 
-const PHASE_COLORS = {
-  blocked: 'color-mix(in oklch, var(--muted-foreground) 40%, transparent)',
-  dns: 'var(--chart-5)',
-  connect: 'var(--chart-3)',
-  ssl: 'color-mix(in oklch, var(--primary) 50%, transparent)',
-  send: 'color-mix(in oklch, var(--primary) 70%, transparent)',
-  wait: 'var(--primary)',
-  receive: 'color-mix(in oklch, var(--primary) 88%, transparent)',
-}
 
 interface Props {
   onLoadSample: () => void
@@ -191,7 +183,7 @@ export function LiveDemo({ onLoadSample, onChooseFile }: Props) {
                     <div className="px-4 py-3 border-t-2 border-border flex-1 overflow-auto">
                       <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">Phase breakdown</div>
                       <div className="space-y-1.5">
-                        {(Object.keys(selectedEntry.phases) as Array<keyof typeof PHASE_COLORS>).map((p) => {
+                        {PHASE_ORDER.map((p) => {
                           const ms = selectedEntry.phases[p]
                           const total = selectedEntry.totalMs || 1
                           const pct = (ms / total) * 100
@@ -200,7 +192,7 @@ export function LiveDemo({ onLoadSample, onChooseFile }: Props) {
                             <div key={p} className="grid grid-cols-[80px_1fr_50px] items-center gap-2">
                               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{p}</span>
                               <span className="relative h-1.5 border border-border/40">
-                                <span className="absolute inset-y-0 left-0" style={{ width: `${Math.max(1, pct)}%`, background: PHASE_COLORS[p] }} />
+                                <span className="absolute inset-y-0 left-0" style={{ width: `${Math.max(1, pct)}%`, background: PHASE_COLOR[p] }} />
                               </span>
                               <span className="font-mono text-[10px] tabular text-right">{formatMs(ms)}</span>
                             </div>
@@ -291,11 +283,11 @@ function DemoRow({ entry, index, reduce, pulseInView, rangeEnd, selected, onSele
           className="absolute top-1/2 -translate-y-1/2 h-2.5 flex items-stretch"
           style={{ left: `${leadingPct}%`, width: `${Math.max(0.6, widthPct)}%`, minWidth: '2px' }}
         >
-          {(Object.keys(entry.phases) as Array<keyof typeof PHASE_COLORS>).map((phase) => {
+          {PHASE_ORDER.map((phase) => {
             const ms = entry.phases[phase]
             const pct = (ms / Math.max(1, entry.totalMs)) * 100
             if (pct <= 0) return null
-            return <span key={phase} style={{ width: `${pct}%`, background: PHASE_COLORS[phase] }} />
+            return <span key={phase} style={{ width: `${pct}%`, background: PHASE_COLOR[phase] }} />
           })}
         </div>
       </span>

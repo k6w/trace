@@ -24,7 +24,7 @@ export function Badge({ children, color, variant = 'tonal', className = '', styl
   return (
     <span
       style={baseStyle}
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium tracking-wide rounded-md border tabular ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] border tabular ${className}`}
     >
       {children}
     </span>

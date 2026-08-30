@@ -15,7 +15,7 @@ export function ResponseTab({ entry }: { entry: NormalizedEntry }) {
     return (
       <div className="space-y-3">
         <Meta mime={mime} size={entry.sizeBytes} />
-        <div className="rounded-md border border-border/70 p-4 grid place-items-center bg-muted/20">
+        <div className="border border-border/70 p-4 grid place-items-center bg-muted/20">
           <img src={src} alt="" className="max-w-full max-h-[60vh]" />
         </div>
       </div>

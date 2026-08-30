@@ -64,7 +64,7 @@ export function Workspace() {
       <TopBar onOpenPalette={() => setPaletteOpen(true)} />
       <InstrumentStrip />
       <FilterToolbar />
-      <Waterfall reduceMotion={false} />
+      <Waterfall />
       <Inspector />
       <CommandPalette
         open={paletteOpen}

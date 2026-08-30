@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace Specimen Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* ── Tokens ────────────────────────────────────────────────────────────────
+   Trace is a dark-first tool, so :root carries the dark palette and the light
+   overrides hang off it. Every surface colour is a token; nothing is declared
+   only inside a media query. */
+:root {
+  --ground:    #0D0D0D;
+  --surface:   #141414;
+  --surface-2: #1B1B1B;
+  --ink:       #F2F0E9;
+  --ink-2:     #A3A199;   /* warm grey, biased toward the amber, not neutral */
+  --ink-3:     #6E6C66;
+  --rule:      #2A2A28;
+  --rule-2:    #3D3C39;
+  --amber:     #F5CF3A;
+  --amber-ink: #141414;
+
+  /* The phase spectrum. Same seven values the app ships. */
+  --p-blocked: #6E6E78;
+  --p-dns:     #3FBDDA;
+  --p-connect: #7C71EE;
+  --p-tls:     #C173E6;
+  --p-send:    #F0913F;
+  --p-wait:    #F5CF3A;
+  --p-receive: #45CE93;
+
+  --shadow: 6px 6px 0 0 var(--rule-2);
+
+  --step-0: 0.6875rem;
+  --step-1: 0.8125rem;
+  --step-2: 0.9375rem;
+  --step-3: 1.25rem;
+  --step-4: 2rem;
+  --step-5: clamp(3rem, 9vw, 7rem);
+  --step-6: clamp(4.5rem, 20vw, 17rem);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ground:    #F7F6F2;
+    --surface:   #FFFFFF;
+    --surface-2: #EFEEE8;
+    --ink:       #141310;
+    --ink-2:     #55534C;
+    --ink-3:     #8A877E;
+    --rule:      #D9D7CF;
+    --rule-2:    #141310;
+    --amber:     #C99A00;
+    --amber-ink: #FFFFFF;
+    --p-blocked: #6E6E78;
+    --p-dns:     #1795B4;
+    --p-connect: #5A4CD4;
+    --p-tls:     #9E45C9;
+    --p-send:    #D06E15;
+    --p-wait:    #C99A00;
+    --p-receive: #17A369;
+    --shadow: 6px 6px 0 0 var(--rule-2);
+  }
+}
+
+:root[data-theme="light"] {
+  --ground:    #F7F6F2;
+  --surface:   #FFFFFF;
+  --surface-2: #EFEEE8;
+  --ink:       #141310;
+  --ink-2:     #55534C;
+  --ink-3:     #8A877E;
+  --rule:      #D9D7CF;
+  --rule-2:    #141310;
+  --amber:     #C99A00;
+  --amber-ink: #FFFFFF;
+  --p-blocked: #6E6E78;
+  --p-dns:     #1795B4;
+  --p-connect: #5A4CD4;
+  --p-tls:     #9E45C9;
+  --p-send:    #D06E15;
+  --p-wait:    #C99A00;
+  --p-receive: #17A369;
+  --shadow: 6px 6px 0 0 var(--rule-2);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--step-1);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--amber); color: var(--amber-ink); }
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+img { display: block; width: 100%; height: auto; }
+
+.wrap {
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+
+.display {
+  font-family: Anton, 'Arial Narrow', Impact, sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.86;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.eyebrow {
+  font-size: var(--step-0);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  margin: 0;
+}
+.eyebrow strong { color: var(--ink); font-weight: 700; }
+
+.prose { max-width: 62ch; }
+.prose p { margin: 0 0 1.1em; color: var(--ink-2); }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--ink); font-weight: 500; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+.status {
+  border-block: 1px solid var(--rule);
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+}
+.status .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  align-items: center;
+  min-height: 2.5rem;
+}
+.status .live { color: var(--ink); display: inline-flex; align-items: center; gap: 0.55rem; }
+.status .live::before {
+  content: "";
+  width: 7px; height: 7px;
+  background: var(--p-receive);
+  animation: blink 2s steps(1) infinite;
+}
+.status .spacer { margin-left: auto; }
+
+@keyframes blink { 50% { opacity: 0.25; } }
+
+.masthead { padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 5vw, 3.5rem); }
+.masthead h1 { font-size: var(--step-6); }
+.masthead .lede {
+  margin: clamp(1.5rem, 4vw, 2.5rem) 0 0;
+  font-size: var(--step-3);
+  line-height: 1.35;
+  max-width: 30ch;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.masthead .lede span { color: var(--ink-3); }
+
+/* ── The signature: a request drawing itself, phase by phase ───────────── */
+.request { margin-top: clamp(2.5rem, 6vw, 4rem); }
+.request-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 1rem; flex-wrap: wrap;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+.bar {
+  display: flex;
+  height: 2.75rem;
+  margin-top: 1.25rem;
+  overflow: hidden;
+}
+.bar span {
+  display: block;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: draw 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes draw { to { transform: scaleX(1); } }
+
+.legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 0.9rem 1rem;
+  margin-top: 1.25rem;
+  list-style: none;
+  padding: 0;
+}
+.legend li { display: flex; flex-direction: column; gap: 0.45rem; }
+.legend .swatch { height: 5px; }
+.legend .name {
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+}
+.legend .ms { font-size: var(--step-0); color: var(--ink-3); }
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+section { padding: clamp(3.5rem, 9vw, 6.5rem) 0; }
+section + section { border-top: 1px solid var(--rule); }
+
+.sec-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+@media (min-width: 56rem) {
+  .sec-head { grid-template-columns: 13rem minmax(0, 1fr); gap: 3rem; }
+}
+.sec-head h2 { font-size: var(--step-4); }
+.sec-head .rail { display: flex; flex-direction: column; gap: 0.6rem; }
+.sec-head .marker { height: 4px; width: 3.5rem; }
+
+/* ── Plates ────────────────────────────────────────────────────────────── */
+.plate { margin-top: clamp(2.5rem, 6vw, 4rem); }
+.plate:first-of-type { margin-top: 0; }
+
+.plate-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+  border-top: 2px solid var(--rule-2);
+  padding-top: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.plate-head h3 {
+  margin: 0;
+  font-size: var(--step-2);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.plate-head .idx {
+  font-size: var(--step-0);
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.plate-head .idx b { color: var(--ink); font-weight: 700; }
+
+.shot {
+  border: 2px solid var(--rule-2);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.caption {
+  margin: 1.4rem 0 0;
+  font-size: var(--step-1);
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+.caption b { color: var(--ink); font-weight: 500; }
+
+/* ── Before / after ────────────────────────────────────────────────────── */
+.compare {
+  position: relative;
+  border: 2px solid var(--rule-2);
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: ew-resize;
+}
+.compare img { display: block; }
+.compare .after {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Clip from the right so the "after" is revealed as the handle moves right. */
+  clip-path: inset(0 0 0 var(--split, 50%));
+}
+.compare .after img { position: absolute; inset: 0; height: 100%; }
+
+.handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: var(--split, 50%);
+  width: 2px;
+  background: var(--amber);
+  pointer-events: none;
+}
+.handle::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  translate: -50% -50%;
+  width: 2.5rem; height: 2.5rem;
+  background: var(--amber);
+  border: 2px solid var(--amber-ink);
+}
+.handle .grip {
+  position: absolute;
+  top: 50%; left: 50%;
+  translate: -50% -50%;
+  z-index: 1;
+  font-size: var(--step-1);
+  font-weight: 700;
+  color: var(--amber-ink);
+  letter-spacing: -0.05em;
+}
+
+.compare-tag {
+  position: absolute;
+  top: 0;
+  padding: 0.3rem 0.7rem;
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  pointer-events: none;
+}
+.compare-tag.l { left: 0; background: var(--surface-2); color: var(--ink-2); border-right: 2px solid var(--rule-2); border-bottom: 2px solid var(--rule-2); }
+.compare-tag.r { right: 0; background: var(--amber); color: var(--amber-ink); border-left: 2px solid var(--rule-2); border-bottom: 2px solid var(--rule-2); }
+
+.compare-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+}
+
+/* ── The changelog table ───────────────────────────────────────────────── */
+.table-scroll { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step-1);
+  min-width: 40rem;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.9rem 1.25rem 0.9rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+th {
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  font-weight: 500;
+  border-bottom: 2px solid var(--rule-2);
+  padding-bottom: 0.7rem;
+}
+td:first-child { color: var(--ink); width: 30%; }
+td:last-child { color: var(--ink-2); padding-right: 0; }
+tr:last-child td { border-bottom: none; }
+
+.tag {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-left: 2px solid currentColor;
+  background: color-mix(in oklab, currentColor 14%, transparent);
+  white-space: nowrap;
+}
+.tag.bug  { color: var(--p-send); }
+.tag.info { color: var(--p-connect); }
+
+/* ── Diagram figures ───────────────────────────────────────────────────── */
+figure { margin: 0; }
+figure svg { display: block; width: 100%; height: auto; }
+
+/* ── Colophon ──────────────────────────────────────────────────────────── */
+.colophon {
+  border-top: 2px solid var(--rule-2);
+  padding: 2.5rem 0 4rem;
+  display: grid;
+  gap: 2rem;
+}
+@media (min-width: 48rem) {
+  .colophon { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.colophon dt {
+  font-size: var(--step-0);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  margin-bottom: 0.5rem;
+}
+.colophon dd { margin: 0; color: var(--ink-2); }
+.colophon a { color: var(--ink); text-decoration-color: var(--amber); text-underline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .bar span { transform: scaleX(1); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="status">
+    <div class="wrap">
+      <span class="live">Specimen</span>
+      <span>Trace &middot; v0.1</span>
+      <span class="spacer">Seven phases &middot; seven colours</span>
+    </div>
+  </div>
+
+  <div class="wrap masthead">
+    <h1 class="display">Trace</h1>
+    <p class="lede">
+      A scoring sheet for HTTP.
+      <span>Drop in a <code>.har</code> export and read your network as a timeline &mdash; every phase, every byte, every wait.</span>
+    </p>
+
+    <!-- The signature: a real request from the sample capture, drawing itself
+         phase by phase the way the request actually completed. -->
+    <div class="request">
+      <div class="request-head">
+        <p class="eyebrow"><strong>GET</strong> acme.studio/articles/ten-thousand-paper-lanterns</p>
+        <p class="eyebrow num"><strong>142 ms</strong></p>
+      </div>
+      <div class="bar" id="bar" role="img" aria-label="A 142 millisecond request split into seven phases: blocked 1 ms, DNS 8 ms, connect 24 ms, TLS 31 ms, send under 1 ms, wait 70 ms, receive 7 ms."></div>
+      <ul class="legend" id="legend"></ul>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rail">
+          <p class="eyebrow">The thesis</p>
+          <span class="marker" style="background: var(--p-wait)"></span>
+        </div>
+        <div>
+          <h2 class="display">One colour tells you nothing</h2>
+          <div class="prose" style="margin-top: 1.5rem">
+            <p>
+              A HAR file records <strong>seven separate phases</strong> for every request: how long it
+              queued, how long DNS took, how long the socket took to open, the TLS handshake, the
+              upload, the wait for the first byte, and the download.
+            </p>
+            <p>
+              Six of those are things you can fix. One of them is usually all of them. If the
+              timing bar is a single block of colour, you cannot tell which &mdash; and that is how
+              almost every HAR viewer draws it, Trace's first pass included.
+            </p>
+            <p>
+              So each phase now gets its own place on one ordered ramp: <strong>cool while the
+              connection is being built, hot amber while you wait on a server, green when bytes
+              finally arrive</strong>. Learn the ramp once and you read a capture the way you read a
+              score. A wall of amber means the backend is slow. A wall of violet means you are
+              renegotiating TLS you should be reusing. A wall of green means you are shipping too
+              many bytes.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <figure>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 320" role="img" aria-label="One HTTP request broken into seven timing phases: blocked, DNS, connect, TLS, send, wait and receive.">
+  <title>The phase spectrum</title>
+  <desc>A single 142 ms request from Trace's sample capture, shown twice: once drawn to scale, once with every phase given equal width so the narrow ones can be labelled. Blocked 1 ms, DNS 8 ms, connect 24 ms, TLS 31 ms, send under 1 ms, wait 70 ms, receive 7 ms.</desc>
+
+  <style>
+    .ps-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ps-dim  { fill: #8A8A93; }
+    .ps-rule { stroke: #8A8A93; stroke-opacity: .3; }
+  </style>
+
+  <text class="ps-mono ps-dim" x="50" y="38" font-size="13" letter-spacing="2.2">GET  ACME.STUDIO/ARTICLES/TEN-THOUSAND-PAPER-LANTERNS</text>
+  <text class="ps-mono" x="950" y="38" font-size="13" letter-spacing="2.2" text-anchor="end" fill="#A9A9B4">142 MS</text>
+  <line class="ps-rule" x1="50" y1="54" x2="950" y2="54" stroke-width="1"/>
+
+  <!-- Drawn to scale. Widths are the real timings from public/sample.har, which
+       is exactly the problem: three of the seven phases are hair-thin. -->
+  <text class="ps-mono ps-dim" x="50" y="86" font-size="10" letter-spacing="2">AS IT HAPPENED</text>
+  <rect x="50"    y="98" width="6.3"   height="30" fill="#6E6E78"/>
+  <rect x="56.3"  y="98" width="50.8"  height="30" fill="#3FBDDA"/>
+  <rect x="107.1" y="98" width="152.3" height="30" fill="#7C71EE"/>
+  <rect x="259.4" y="98" width="196.8" height="30" fill="#C173E6"/>
+  <rect x="456.2" y="98" width="5.1"   height="30" fill="#F0913F"/>
+  <rect x="461.3" y="98" width="444.3" height="30" fill="#F5CF3A"/>
+  <rect x="905.6" y="98" width="44.4"  height="30" fill="#45CE93"/>
+
+  <!-- Same seven phases, same order, equal widths — so every one gets a name. -->
+  <text class="ps-mono ps-dim" x="50" y="176" font-size="10" letter-spacing="2">PHASE BY PHASE</text>
+  <g>
+    <rect x="50"    y="188" width="126.6" height="18" fill="#6E6E78"/>
+    <rect x="180.9" y="188" width="126.6" height="18" fill="#3FBDDA"/>
+    <rect x="311.7" y="188" width="126.6" height="18" fill="#7C71EE"/>
+    <rect x="442.6" y="188" width="126.6" height="18" fill="#C173E6"/>
+    <rect x="573.4" y="188" width="126.6" height="18" fill="#F0913F"/>
+    <rect x="704.3" y="188" width="126.6" height="18" fill="#F5CF3A"/>
+    <rect x="835.1" y="188" width="126.6" height="18" fill="#45CE93"/>
+  </g>
+  <g class="ps-mono" font-size="12" letter-spacing="1.6">
+    <text x="50"    y="228" fill="#6E6E78">BLOCKED</text>
+    <text x="180.9" y="228" fill="#3FBDDA">DNS</text>
+    <text x="311.7" y="228" fill="#7C71EE">CONNECT</text>
+    <text x="442.6" y="228" fill="#C173E6">TLS</text>
+    <text x="573.4" y="228" fill="#F0913F">SEND</text>
+    <text x="704.3" y="228" fill="#F5CF3A">WAIT</text>
+    <text x="835.1" y="228" fill="#45CE93">RECEIVE</text>
+  </g>
+  <g class="ps-mono ps-dim" font-size="11" letter-spacing="1.2">
+    <text x="50"    y="246">1 ms</text>
+    <text x="180.9" y="246">8 ms</text>
+    <text x="311.7" y="246">24 ms</text>
+    <text x="442.6" y="246">31 ms</text>
+    <text x="573.4" y="246">&lt; 1 ms</text>
+    <text x="704.3" y="246">70 ms</text>
+    <text x="835.1" y="246">7 ms</text>
+  </g>
+
+  <line class="ps-rule" x1="50" y1="278" x2="950" y2="278" stroke-width="1"/>
+  <text class="ps-mono ps-dim" x="50" y="300" font-size="11" letter-spacing="1.8">SEVEN PHASES, SEVEN COLORS · COOL WHILE CONNECTING, HOT WHILE WAITING, GREEN ON ARRIVAL</text>
+  <text class="ps-mono" x="950" y="300" font-size="11" letter-spacing="1.8" text-anchor="end" fill="#D8A800">49% WAITING</text>
+</svg>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rail">
+          <p class="eyebrow">Plates</p>
+          <span class="marker" style="background: var(--p-connect)"></span>
+        </div>
+        <div>
+          <h2 class="display">Five views</h2>
+          <p class="prose" style="margin-top: 1.5rem">
+            Every plate is captured from the running app by
+            <code>scripts/screenshots.mjs</code>, so none of them can drift out of date.
+          </p>
+        </div>
+      </div>
+
+      <article class="plate">
+        <div class="plate-head">
+          <h3>The waterfall, before and after</h3>
+          <span class="idx"><b>Plate 01</b> &middot; drag to compare</span>
+        </div>
+        <div class="compare" id="compare" style="--split: 50%">
+          <img src="media/workspace-before.png" alt="The waterfall before the revamp: every timing bar rendered in a single shade of amber, and the METHOD and URL column headings colliding into one unreadable word.">
+          <div class="after">
+            <img src="media/workspace.png" alt="The waterfall after the revamp: timing bars segmented into seven distinguishable phase colours, three-letter type chips, aligned column headings and a phase legend pinned to the bottom.">
+          </div>
+          <span class="compare-tag l">Before</span>
+          <span class="compare-tag r">After</span>
+          <div class="handle" aria-hidden="true"><span class="grip">&lt;&gt;</span></div>
+          <input class="compare-slider" id="split" type="range" min="0" max="100" value="50" step="0.5"
+                 aria-label="Reveal the redesigned waterfall">
+        </div>
+        <p class="caption">
+          Same capture, same 33 requests. On the left, every phase is amber, so the bars carry no
+          information beyond duration &mdash; and the <b>METHOD</b> and <b>URL</b> headings have
+          collided into one word, because the header row and the data rows were laying themselves
+          out on two different grids. On the right, both grids come from one constant, and the
+          spectrum does the talking: the cyan-to-violet run at the head of each bar is connection
+          setup, the amber is time spent waiting on a server.
+        </p>
+      </article>
+
+      <article class="plate">
+        <div class="plate-head">
+          <h3>The inspector</h3>
+          <span class="idx"><b>Plate 02</b></span>
+        </div>
+        <div class="shot">
+          <img src="media/inspector.png" alt="The inspector open on a slow API request, showing method and status badges, the full URL, copy buttons, a colour-segmented phase bar reading 96 percent wait, a metadata table, and a walkable request chain.">
+        </div>
+        <p class="caption">
+          Overview now leads with <b>where the time went</b>, because that is nearly always the
+          question. Selecting a row used to paint it solid amber underneath amber text, which made
+          the row you had just chosen the only unreadable one on screen; selection is now a rail
+          and a whisper of tint, and the timing bar survives it.
+        </p>
+      </article>
+
+      <article class="plate">
+        <div class="plate-head">
+          <h3>The timing lens</h3>
+          <span class="idx"><b>Plate 03</b></span>
+        </div>
+        <div class="shot">
+          <img src="media/timing.png" alt="The Timing lens: a phase breakdown showing blocked 2 milliseconds, send under 1 millisecond, wait 1.74 seconds and receive 78 milliseconds, each with a plain-language description, and a note that wait cost 1.74 seconds.">
+        </div>
+        <p class="caption">
+          Phases are laid out cumulatively, so each bar sits where it actually happened in the
+          request rather than flush-left like a bar chart. Every phase carries a plain-language
+          description, and the one that ate the request is named outright: <b>waiting for the first
+          byte &mdash; this one cost you 1.74&nbsp;s</b>.
+        </p>
+      </article>
+
+      <article class="plate">
+        <div class="plate-head">
+          <h3>Light theme</h3>
+          <span class="idx"><b>Plate 04</b></span>
+        </div>
+        <div class="shot">
+          <img src="media/workspace-light.png" alt="The same waterfall rendered in the light theme, with the phase colours pitched darker so they hold against a paper background.">
+        </div>
+        <p class="caption">
+          The seven hues are tuned twice &mdash; pitched darker on paper, lighter on ink &mdash; so the
+          ramp reads as the same ordered set in either theme rather than as a naive inversion.
+        </p>
+      </article>
+
+      <article class="plate">
+        <div class="plate-head">
+          <h3>The landing page</h3>
+          <span class="idx"><b>Plate 05</b></span>
+        </div>
+        <div class="shot">
+          <img src="media/hero.png" alt="Trace's landing page: a large TRACE wordmark set in Anton, a drop zone for .har files, a live waterfall preview running on the bundled sample capture, and the phase key along the bottom.">
+        </div>
+        <p class="caption">
+          The panel on the right is not a screenshot &mdash; it is a real, sandboxed workspace running
+          the bundled sample capture. The strip along the bottom of the left column used to hold
+          invented map coordinates and a fake serial number. It is now the <b>phase key</b>, which
+          is true, useful, and drawn in the exact colours the panel beside it is already using.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rail">
+          <p class="eyebrow">Repairs</p>
+          <span class="marker" style="background: var(--p-send)"></span>
+        </div>
+        <div>
+          <h2 class="display">What was actually broken</h2>
+          <p class="prose" style="margin-top: 1.5rem">
+            The identity was already strong. What needed work was the information design &mdash; and a
+            handful of defects that had shipped with it.
+          </p>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Symptom</th>
+              <th scope="col">Kind</th>
+              <th scope="col">Cause, and the fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Seven phases, one colour</td>
+              <td><span class="tag info">Design</span></td>
+              <td>Five of the seven phase colours were shades of the same amber, so the bars carried no phase information at all. One ordered spectrum now lives in <code>src/lib/phases.ts</code>, and the waterfall, inspector, legend and landing demo all draw from it.</td>
+            </tr>
+            <tr>
+              <td><code>METHOD</code> and <code>URL</code> collided</td>
+              <td><span class="tag bug">Bug</span></td>
+              <td>The header row and the data rows each declared their own grid template, and the two had drifted apart. Both now read one exported constant.</td>
+            </tr>
+            <tr>
+              <td>The selected row went unreadable</td>
+              <td><span class="tag bug">Bug</span></td>
+              <td>Selection filled the row with amber while its children kept amber and muted text colours. Selection is now a rail plus a light tint, so the row &mdash; and its timing bar &mdash; stays legible.</td>
+            </tr>
+            <tr>
+              <td>Hover turned rows olive</td>
+              <td><span class="tag bug">Bug</span></td>
+              <td><code>hover:bg-primary/30</code> over a dark ground. Replaced with a neutral tint that does not fight the bars.</td>
+            </tr>
+            <tr>
+              <td>The page blurred behind the inspector</td>
+              <td><span class="tag bug">Bug</span></td>
+              <td>The backdrop dropped its background at the large breakpoint but kept its <code>backdrop-blur</code>, so the desktop waterfall went soft for no reason. The blur is now dropped with it.</td>
+            </tr>
+            <tr>
+              <td>Rows re-animated while scrolling</td>
+              <td><span class="tag bug">Bug</span></td>
+              <td>Virtualized rows carried a per-index entrance animation, so they faded in again every time they were recycled. Removed.</td>
+            </tr>
+            <tr>
+              <td>A missing favicon and an undefined class</td>
+              <td><span class="tag bug">Bug</span></td>
+              <td><code>index.html</code> pointed at a <code>/favicon.svg</code> that was never committed, and <code>App.tsx</code> carried a <code>mesh-bg</code> class no stylesheet defined. Both now exist.</td>
+            </tr>
+            <tr>
+              <td>Two colour systems competing</td>
+              <td><span class="tag info">Design</span></td>
+              <td>Resource types borrowed the same hues as the phase ramp, so cyan meant both DNS and CSS. Type is now read from a three-letter chip and its colour dropped to a low-chroma hint, leaving saturated colour to the phases.</td>
+            </tr>
+            <tr>
+              <td>Circles in a squared-off design</td>
+              <td><span class="tag info">Design</span></td>
+              <td>Radius tokens resolved to zero everywhere except <code>rounded-full</code>, which kept a scatter of dots circular. All corners are square now.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="rail">
+          <p class="eyebrow">Privacy</p>
+          <span class="marker" style="background: var(--p-receive)"></span>
+        </div>
+        <div>
+          <h2 class="display">It never leaves the tab</h2>
+          <div class="prose" style="margin-top: 1.5rem">
+            <p>
+              HAR files are not harmless. They hold every header of every request &mdash; session
+              cookies, bearer tokens, API keys, and whatever was in your request bodies. Pasting one
+              into an online viewer hands all of that to someone else's server.
+            </p>
+            <p>
+              Trace is a static page. Parsing happens in your tab through the File API. Open your
+              own DevTools network panel while you use it and you will see exactly one request:
+              <strong>the page itself</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <figure>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" role="img" aria-label="Trace's data flow: a HAR file is read by the File API, parsed, normalized and rendered entirely inside the browser tab. Nothing is uploaded.">
+  <title>Where the data goes</title>
+  <desc>A .har file on disk is read through the File API, parsed as HAR 1.2, normalized into entries and rendered as a virtualized waterfall — all four steps inside a single browser tab. The path to any server is struck through: zero bytes are uploaded.</desc>
+
+  <style>
+    .ar-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ar-dim  { fill: #8A8A93; }
+    .ar-box  { fill: none; stroke: #8A8A93; stroke-opacity: .55; stroke-width: 1.5; }
+    .ar-flow { stroke: #F5CF3A; stroke-width: 1.5; fill: none; }
+    .ar-dash { fill: none; stroke: #8A8A93; stroke-opacity: .45; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .ar-dead { stroke: #8A8A93; stroke-opacity: .45; stroke-width: 1.5; fill: none; }
+  </style>
+
+  <defs>
+    <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L9,5 L0,9 z" fill="#F5CF3A"/>
+    </marker>
+  </defs>
+
+  <text class="ar-mono ar-dim" x="50" y="36" font-size="13" letter-spacing="2.2">WHERE YOUR CAPTURE GOES</text>
+  <line x1="50" y1="52" x2="950" y2="52" stroke="#8A8A93" stroke-opacity=".3" stroke-width="1"/>
+
+  <!-- Everything inside this boundary runs in the tab. -->
+  <rect class="ar-dash" x="40" y="76" width="920" height="132" />
+  <text class="ar-mono ar-dim" x="56" y="98" font-size="10" letter-spacing="2">ONE BROWSER TAB</text>
+
+  <g class="ar-box">
+    <rect x="64"  y="112" width="190" height="66"/>
+    <rect x="288" y="112" width="190" height="66"/>
+    <rect x="512" y="112" width="190" height="66"/>
+    <rect x="736" y="112" width="190" height="66"/>
+  </g>
+
+  <g class="ar-mono" font-size="12" letter-spacing="1.4" fill="#A9A9B4" text-anchor="middle">
+    <text x="159" y="140">DROP .HAR</text>
+    <text x="383" y="140">PARSE</text>
+    <text x="607" y="140">NORMALIZE</text>
+    <text x="831" y="140">RENDER</text>
+  </g>
+  <g class="ar-mono ar-dim" font-size="10.5" letter-spacing="1.1" text-anchor="middle">
+    <text x="159" y="160">File API</text>
+    <text x="383" y="160">HAR 1.2 · JSON</text>
+    <text x="607" y="160">entries + phases</text>
+    <text x="831" y="160">virtualized rows</text>
+  </g>
+
+  <g class="ar-flow" marker-end="url(#tip)">
+    <line x1="256" y1="145" x2="284" y2="145"/>
+    <line x1="480" y1="145" x2="508" y2="145"/>
+    <line x1="704" y1="145" x2="732" y2="145"/>
+  </g>
+
+  <!-- The path that is never taken. -->
+  <path class="ar-dead" d="M500,208 L500,252"/>
+  <rect class="ar-box" x="392" y="252" width="216" height="46" stroke-dasharray="4 4"/>
+  <text class="ar-mono ar-dim" x="500" y="272" font-size="12" letter-spacing="1.4" text-anchor="middle">ANY SERVER</text>
+  <text class="ar-mono ar-dim" x="500" y="289" font-size="10.5" letter-spacing="1.1" text-anchor="middle">0 bytes uploaded</text>
+  <g stroke="#C0392B" stroke-width="2.5" stroke-linecap="round">
+    <line x1="486" y1="216" x2="514" y2="244"/>
+    <line x1="514" y1="216" x2="486" y2="244"/>
+  </g>
+
+  <text class="ar-mono ar-dim" x="50" y="318" font-size="11" letter-spacing="1.6">TRACE IS A STATIC PAGE. THERE IS NO BACKEND TO SEND ANYTHING TO.</text>
+  <text class="ar-mono" x="950" y="318" font-size="11" letter-spacing="1.6" text-anchor="end" fill="#D8A800">1 REQUEST: THE PAGE ITSELF</text>
+</svg>
+      </figure>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <dl class="colophon">
+    <div>
+      <dt>Built with</dt>
+      <dd>Vite&nbsp;6 &middot; React&nbsp;18 &middot; TypeScript &middot; Tailwind&nbsp;v4 &middot; Motion &middot; TanStack Virtual &middot; Shiki</dd>
+    </div>
+    <div>
+      <dt>Set in</dt>
+      <dd>Anton for display, JetBrains Mono for everything technical &mdash; which, in a HAR reader, is everything.</dd>
+    </div>
+    <div>
+      <dt>Source</dt>
+      <dd><a href="https://github.com/k6w/trace">github.com/k6w/trace</a> &middot; MIT</dd>
+    </div>
+  </dl>
+</footer>
+
+<script>
+/* The phases of the sample capture's document request, in the order they
+   happened. Widths are the real timings, which is the whole point. */
+const PHASES = [
+  { name: 'Blocked', ms: 1,    label: '1 ms',    token: '--p-blocked' },
+  { name: 'DNS',     ms: 8,    label: '8 ms',    token: '--p-dns'     },
+  { name: 'Connect', ms: 24,   token: '--p-connect', label: '24 ms'   },
+  { name: 'TLS',     ms: 31,   label: '31 ms',   token: '--p-tls'     },
+  { name: 'Send',    ms: 0.8,  label: '< 1 ms',  token: '--p-send'    },
+  { name: 'Wait',    ms: 70,   label: '70 ms',   token: '--p-wait'    },
+  { name: 'Receive', ms: 7,    label: '7 ms',    token: '--p-receive' },
+];
+
+const total = PHASES.reduce((a, p) => a + p.ms, 0);
+const bar = document.getElementById('bar');
+const legend = document.getElementById('legend');
+
+let delay = 0;
+for (const p of PHASES) {
+  const seg = document.createElement('span');
+  seg.style.width = (p.ms / total * 100) + '%';
+  seg.style.background = 'var(' + p.token + ')';
+  seg.style.animationDelay = delay + 'ms';
+  bar.append(seg);
+  // Stagger in proportion to the phase, so the bar draws at the pace the
+  // request actually ran.
+  delay += 90 + (p.ms / total) * 900;
+
+  const li = document.createElement('li');
+  const swatch = document.createElement('span');
+  swatch.className = 'swatch';
+  swatch.style.background = 'var(' + p.token + ')';
+  const name = document.createElement('span');
+  name.className = 'name';
+  name.style.color = 'var(' + p.token + ')';
+  name.textContent = p.name;
+  const ms = document.createElement('span');
+  ms.className = 'ms num';
+  ms.textContent = p.label;
+  li.append(swatch, name, ms);
+  legend.append(li);
+}
+
+/* Before / after. The range input is the control — it carries keyboard and
+   screen-reader support for free; pointer drags just write to it. */
+const compare = document.getElementById('compare');
+const split = document.getElementById('split');
+
+const apply = () => compare.style.setProperty('--split', split.value + '%');
+split.addEventListener('input', apply);
+apply();
+
+const track = (event) => {
+  const rect = compare.getBoundingClientRect();
+  const pct = ((event.clientX - rect.left) / rect.width) * 100;
+  split.value = Math.min(100, Math.max(0, pct));
+  apply();
+};
+
+compare.addEventListener('pointerdown', (event) => {
+  if (event.target === split) return;
+  compare.setPointerCapture(event.pointerId);
+  track(event);
+});
+compare.addEventListener('pointermove', (event) => {
+  if (compare.hasPointerCapture(event.pointerId)) track(event);
+});
+compare.addEventListener('pointerup', (event) => {
+  if (compare.hasPointerCapture(event.pointerId)) compare.releasePointerCapture(event.pointerId);
+});
+</script>
+
+</body>
+</html>
