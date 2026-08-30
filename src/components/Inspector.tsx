@@ -25,8 +25,12 @@ const TABS: { value: TabId; label: string }[] = [
 ]
 
 export function Inspector() {
-  const { selected, select, filtered, next, prev } = useHar()
-  const entry = selected != null ? filtered.find((e) => e.id === selected) : undefined
+  const { selected, select, filtered, entries, next, prev } = useHar()
+  /* Fall back to the full set: the request chain can jump to an entry the
+     current filters hide, and the drawer vanishing is not an answer. */
+  const entry = selected != null
+    ? (filtered.find((e) => e.id === selected) ?? entries.find((e) => e.id === selected))
+    : undefined
   const [tab, setTab] = useState<TabId>('overview')
   const open = !!entry
 
@@ -53,7 +57,7 @@ export function Inspector() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-40 bg-background/50 backdrop-blur-[2px] lg:bg-transparent lg:backdrop-blur-none"
+            className="fixed inset-0 z-40 bg-background/50 backdrop-blur-[2px] lg:hidden"
             onClick={close}
           />
           <motion.aside

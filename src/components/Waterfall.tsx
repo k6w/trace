@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useHar } from '../hooks/useHar'
 import { TimeAxis } from './TimeAxis'
 import { WaterfallRow } from './WaterfallRow'
@@ -7,11 +7,7 @@ import { PhaseLegend } from './PhaseLegend'
 import { ROW_HEIGHT, WATERFALL_GAP, WATERFALL_GRID } from './waterfallGrid'
 import { formatNumber } from '../lib/format'
 
-interface Props {
-  reduceMotion: boolean
-}
-
-export function Waterfall({ reduceMotion }: Props) {
+export function Waterfall() {
   const { filtered, entries, har, selected, select, next, prev } = useHar()
   const rangeStart = 0
   const rangeEnd = har?.meta.rangeEnd ?? 0
@@ -44,14 +40,29 @@ export function Waterfall({ reduceMotion }: Props) {
     if (idx >= 0) virtualizer.scrollToIndex(idx, { align: 'auto' })
   }, [selected, filtered, virtualizer])
 
+  /* The rows scroll and the ruler does not, so the ruler is as wide as the
+     section while the rows are narrower by whatever the scrollbar takes. Left
+     alone that puts every tick out of register with the bars it labels, so
+     measure the gutter and pad the header to match. */
+  const [gutter, setGutter] = useState(0)
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const measure = () => setGutter(el.offsetWidth - el.clientWidth)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   const virtualEntries = virtualizer.getVirtualItems()
   const gridStyle = { gridTemplateColumns: WATERFALL_GRID, columnGap: WATERFALL_GAP }
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      {/* Column heads and the time ruler share one grid, so a label can never
-          drift out from over the column it names. */}
-      <div className="sticky top-0 z-10 border-b-2 border-border bg-background">
+      {/* Column heads and the time ruler share one grid with the rows, so a
+          label cannot drift out from over the column it names. */}
+      <div className="z-10 border-b-2 border-border bg-background" style={{ paddingRight: gutter }}>
         <div
           className="grid h-6 items-center px-4 md:px-6 pt-1"
           style={gridStyle}
@@ -92,12 +103,10 @@ export function Waterfall({ reduceMotion }: Props) {
                 >
                   <WaterfallRow
                     entry={entry}
-                    index={vi.index}
                     selected={selected === entry.id}
                     rangeStart={rangeStart}
                     rangeEnd={rangeEnd}
                     onSelect={select}
-                    reduceMotion={reduceMotion}
                   />
                 </div>
               )

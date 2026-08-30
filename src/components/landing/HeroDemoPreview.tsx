@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { parseHar, type NormalizedEntry } from '../../lib/har'
 import { RESOURCE_TYPE_COLOR } from '../../lib/classify'
 import { formatBytes, formatMs, formatStatus, statusColor } from '../../lib/format'
-import { PHASE_COLOR as PHASE_COLORS } from '../../lib/phases'
+import { PHASE_COLOR, PHASE_ORDER } from '../../lib/phases'
 
 
 export function HeroDemoPreview() {
@@ -118,11 +118,11 @@ export function HeroDemoPreview() {
                     className="absolute top-1/2 -translate-y-1/2 h-2 flex items-stretch"
                     style={{ left: `${leadingPct}%`, width: `${Math.max(0.6, widthPct)}%`, minWidth: '2px' }}
                   >
-                    {(Object.keys(e.phases) as Array<keyof typeof PHASE_COLORS>).map((phase) => {
+                    {PHASE_ORDER.map((phase) => {
                       const ms = e.phases[phase]
                       const pct = (ms / Math.max(1, e.totalMs)) * 100
                       if (pct <= 0) return null
-                      return <span key={phase} style={{ width: `${pct}%`, background: PHASE_COLORS[phase] }} />
+                      return <span key={phase} style={{ width: `${pct}%`, background: PHASE_COLOR[phase] }} />
                     })}
                   </div>
                 </span>

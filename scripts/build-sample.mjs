@@ -25,9 +25,13 @@ function makeEntry({
     ssl: rand(0, 22), send: rand(0, 1.5), wait: time * rand(0.55, 0.85),
     receive: time * rand(0.05, 0.2),
   }
+  // HAR 1.2: `time` is blocked+dns+connect+send+wait+receive, and `ssl` is
+  // contained within `connect`. Scale to fit, then fold ssl back inside connect
+  // so the fixture matches what a real browser exports.
   const sum = Object.values(t).reduce((a, b) => a + b, 0)
   const ratio = time / sum
   Object.keys(t).forEach((k) => { t[k] = Math.max(0, +(t[k] * ratio).toFixed(2)) })
+  if (t.ssl > 0) t.connect = +(t.connect + t.ssl).toFixed(2)
 
   const hostHeaders = [
     { name: 'host', value: new URL(url).host },

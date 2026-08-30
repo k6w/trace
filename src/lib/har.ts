@@ -222,11 +222,18 @@ function normalize(log: HarLog, fileName: string): NormalizedHar {
     totalBytes += transferred
 
     const t = e.timings || {}
+    const rawConnect = Math.max(0, t.connect ?? 0)
+    const ssl = Math.max(0, t.ssl ?? 0)
+    // HAR 1.2 defines `ssl` as contained *within* `connect`, so summing both
+    // double-counts the handshake and pushes a bar past 100% of its own
+    // duration. Carve it out — but only when the numbers actually support
+    // nesting, since some generators emit the two side by side.
+    const connect = ssl > 0 && rawConnect >= ssl ? rawConnect - ssl : rawConnect
     const phases = {
       blocked: Math.max(0, t.blocked ?? 0),
       dns: Math.max(0, t.dns ?? 0),
-      connect: Math.max(0, t.connect ?? 0),
-      ssl: Math.max(0, t.ssl ?? 0),
+      connect,
+      ssl,
       send: Math.max(0, t.send ?? 0),
       wait: Math.max(0, t.wait ?? 0),
       receive: Math.max(0, t.receive ?? 0),

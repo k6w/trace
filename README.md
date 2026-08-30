@@ -48,7 +48,7 @@ Once you know the ramp, you read a capture the way you read a score. A wall of a
 
 Every request in the capture, virtualized, with the phase spectrum running through it. The legend stays pinned to the bottom so the colors never need looking up.
 
-<img src="docs/media/workspace.png" alt="Trace's waterfall view: 33 requests with type chips, methods, URLs, status codes, sizes, and multi-colored timing bars laid out against a time axis, over a stat strip showing 33 requests, 1.03 MB, 4.02 s wall clock, 1.82 s slowest and 2 errors." width="100%">
+<img src="docs/media/workspace.png" alt="Trace's waterfall view: 33 requests with type chips, methods, URLs, status codes, sizes, and multi-colored timing bars laid out against a time axis, over a stat strip showing 33 requests, 1.03 MB, 3.05 s wall clock, 1.82 s slowest and 2 errors." width="100%">
 
 The strip along the top summarizes whatever survives your filters, so the numbers move as you narrow the set. **Slowest** is usually the one worth clicking. Drag across the activity histogram to clamp the whole view to a time window.
 

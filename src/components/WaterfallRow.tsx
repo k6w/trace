@@ -7,12 +7,10 @@ import { WATERFALL_GAP, WATERFALL_GRID } from './waterfallGrid'
 
 interface Props {
   entry: NormalizedEntry
-  index: number
   selected: boolean
   rangeStart: number
   rangeEnd: number
   onSelect: (id: number) => void
-  reduceMotion: boolean
 }
 
 export function WaterfallRow({ entry, selected, rangeStart, rangeEnd, onSelect }: Props) {
@@ -69,7 +67,7 @@ export function WaterfallRow({ entry, selected, rangeStart, rangeEnd, onSelect }
         {/* Total time, and the phase that ate it — but only when the culprit is
             something other than the usual wait, so the label stays a signal. */}
         <span className="pointer-events-none absolute right-0 top-1/2 flex -translate-y-1/2 items-center gap-2 pl-3 font-mono text-[10px] tabular">
-          {lead.phase !== 'wait' && lead.share > 0.4 && (
+          {lead && lead.phase !== 'wait' && lead.share > 0.4 && (
             <span
               className="hidden xl:inline text-[9px] uppercase tracking-[0.1em]"
               style={{ color: PHASE_COLOR[lead.phase] }}

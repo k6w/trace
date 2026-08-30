@@ -61,7 +61,7 @@
   --phase-connect: oklch(0.5200 0.1600 268);
   --phase-ssl:     oklch(0.5500 0.1900 310);
   --phase-send:    oklch(0.6400 0.1600 45);
-  --phase-wait:    oklch(0.8150 0.1720 92);
+  --phase-wait:    oklch(0.6450 0.1480 85);
   --phase-receive: oklch(0.5800 0.1500 155);
 
   /* Resource-type accents. Deliberately quieter than the phase ramp — type is
@@ -405,13 +405,4 @@
   .row-selected { background-color: color-mix(in oklch, var(--primary) 13%, transparent); }
   .row-selected:hover { background-color: color-mix(in oklch, var(--primary) 18%, transparent); }
 
-  /* Faint vertical rules behind the timeline column, aligned to the axis ticks.
-     Turns loose bars into a readable score. */
-  .timeline-rules {
-    background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in oklch, var(--muted-foreground) 16%, transparent) 0 1px,
-      transparent 1px var(--rule-step, 12.5%)
-    );
-  }
 }

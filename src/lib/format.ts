@@ -68,3 +68,18 @@ export function statusColor(status: number): string {
   if (status >= 300) return 'var(--muted-foreground)'
   return 'var(--foreground)'
 }
+
+/* POSIX single-quote escaping. A HAR is untrusted input — URLs and header
+   values routinely contain apostrophes, and a malicious one could otherwise
+   close the quote and append its own shell command to something the user is
+   about to paste into a terminal. */
+export function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`
+}
+
+export function toCurl(method: string, url: string, headers: Array<{ name: string; value: string }>): string {
+  const parts = ['curl', shellQuote(url)]
+  if (method.toUpperCase() !== 'GET') parts.push('-X', method.toUpperCase())
+  for (const h of headers) parts.push('-H', shellQuote(`${h.name}: ${h.value}`))
+  return parts.join(' ')
+}

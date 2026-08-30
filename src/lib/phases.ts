@@ -42,15 +42,29 @@ export const PHASE_DESCRIPTION: Record<Phase, string> = {
   receive: 'Downloading the response',
 }
 
-/* Which phase took the largest share of this request. The headline of every row. */
-export function dominantPhase(phases: Record<Phase, number>): { phase: Phase; ms: number; share: number } {
+/* Total measured time across all seven phases. Always draw bars against this
+   rather than against `entry.totalMs`: HAR's `time` is the generator's own
+   figure and need not equal the sum of the parts, and a mismatch shows up as
+   segments that overshoot or undershoot their own track. */
+export function phaseSum(phases: Record<Phase, number>): number {
   let total = 0
+  for (const p of PHASE_ORDER) total += Math.max(0, phases[p] ?? 0)
+  return total
+}
+
+/* Which phase took the largest share of this request. The headline of every
+   row. Returns null when there is no timing to attribute — a cached entry has
+   no dominant phase, and claiming one would invent a cause. */
+export function dominantPhase(
+  phases: Record<Phase, number>
+): { phase: Phase; ms: number; share: number } | null {
+  const total = phaseSum(phases)
+  if (total <= 0) return null
   let best: Phase = 'wait'
-  let bestMs = -1
+  let bestMs = 0
   for (const p of PHASE_ORDER) {
-    const ms = phases[p] ?? 0
-    total += ms
+    const ms = Math.max(0, phases[p] ?? 0)
     if (ms > bestMs) { bestMs = ms; best = p }
   }
-  return { phase: best, ms: Math.max(0, bestMs), share: total > 0 ? bestMs / total : 0 }
+  return { phase: best, ms: bestMs, share: bestMs / total }
 }

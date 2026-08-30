@@ -35,8 +35,10 @@ export function TimeAxis({ rangeStart, rangeEnd, className = '' }: Props) {
     <div className={`relative h-6 ${className}`}>
       {ticks.map((t, i) => {
         const left = (t.ms / span) * 100
-        // The last label would hang off the right edge; pull it back inside.
-        const isLast = i === ticks.length - 1
+        // Only the tick that actually reaches the right edge would hang off it.
+        // Ticks stop short of the edge whenever the span is not a whole number
+        // of steps, and those must stay left-anchored like every other label.
+        const isLast = left > 97
         return (
           <div
             key={i}

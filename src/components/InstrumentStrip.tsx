@@ -14,7 +14,7 @@ export function InstrumentStrip() {
       <div className="flex flex-col md:flex-row md:items-stretch">
         <Cell><StatTile label="Requests" value={sum.count} format={formatNumber} /></Cell>
         <Cell><StatTile label="Transferred" value={sum.totalBytes} format={formatBytes} /></Cell>
-        <Cell><StatTile label="Wall clock" value={sum.rangeMs} format={formatMs} /></Cell>
+        <Cell><StatTile label="Wall clock" value={sum.windowMs} format={formatMs} /></Cell>
         <Cell>
           <StatTile
             label="Slowest"
@@ -32,7 +32,7 @@ export function InstrumentStrip() {
             delta={sum.errors > 0 ? '4xx / 5xx' : undefined}
           />
         </Cell>
-        <Cell className="min-w-0 flex-1 border-r-0"><HistogramStrip /></Cell>
+        <Cell className="min-w-0 flex-1"><HistogramStrip /></Cell>
       </div>
     </section>
   )
@@ -40,7 +40,7 @@ export function InstrumentStrip() {
 
 function Cell({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex min-w-[132px] flex-col border-b border-border-soft px-4 py-4 md:border-b-0 md:border-r md:px-5 ${className}`}>
+    <div className={`flex min-w-[132px] flex-col border-border-soft px-4 py-4 not-last:border-b md:px-5 md:not-last:border-b-0 md:not-last:border-r ${className}`}>
       {children}
     </div>
   )

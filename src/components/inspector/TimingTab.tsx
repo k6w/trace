@@ -29,7 +29,7 @@ export function TimingTab({ entry }: { entry: NormalizedEntry }) {
               </dt>
               <dd className="font-mono text-[11px] leading-relaxed text-foreground/90">
                 {PHASE_DESCRIPTION[p]}
-                {p === lead.phase && (
+                {lead && p === lead.phase && (
                   <span className="ml-2 text-primary">← this one cost you {formatMs(lead.ms)}</span>
                 )}
               </dd>

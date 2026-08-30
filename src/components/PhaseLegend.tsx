@@ -17,18 +17,3 @@ export function PhaseLegend({ className = '' }: { className?: string }) {
   )
 }
 
-/* Compact form: an unbroken seven-stop ramp with the ends labelled. Used where
-   there is no room for the full key. */
-export function PhaseRamp({ className = '' }: { className?: string }) {
-  return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Blocked</span>
-      <span className="flex h-2 w-28">
-        {PHASE_ORDER.map((p) => (
-          <span key={p} className="flex-1" style={{ background: PHASE_COLOR[p] }} />
-        ))}
-      </span>
-      <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Receive</span>
-    </div>
-  )
-}

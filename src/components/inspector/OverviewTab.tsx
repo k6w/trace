@@ -4,17 +4,32 @@ import { KeyValue } from '../../ui/KeyValue'
 import { CopyButton } from '../../ui/CopyButton'
 import { TypeChip } from '../../ui/TypeChip'
 import { PhaseBreakdown } from './PhaseBreakdown'
-import { formatBytes, formatMs, formatStatus, methodColor, statusColor, formatTimeOfDay } from '../../lib/format'
+import { formatBytes, formatMs, formatStatus, methodColor, statusColor, formatTimeOfDay, toCurl } from '../../lib/format'
 import { useHar } from '../../hooks/useHar'
+import { useMemo } from 'react'
 
 export function OverviewTab({ entry }: { entry: NormalizedEntry }) {
   const { entries, select } = useHar()
 
-  /* HAR records what asked for each request. Resolve it to an entry we already
-     have so the chain is walkable instead of just a URL to squint at. */
-  const initiatorUrl = entry.raw._initiator?.url
-  const initiator = initiatorUrl ? entries.find((e) => e.url === initiatorUrl) : undefined
-  const triggered = entries.filter((e) => e.raw._initiator?.url === entry.url && e.id !== entry.id)
+  /* HAR records what asked for each request, but only as a URL — and a URL is
+     not unique in a capture that polls. Resolve against the entries we already
+     have, preferring the most recent one that had actually started, which is
+     the only candidate that could have issued this request. */
+  const { initiator, triggered } = useMemo(() => {
+    const initiatorUrl = entry.raw._initiator?.url
+    let initiator: NormalizedEntry | undefined
+    if (initiatorUrl && initiatorUrl !== entry.url) {
+      for (const e of entries) {
+        if (e.url !== initiatorUrl || e.id === entry.id) continue
+        if (e.startMs > entry.startMs) continue
+        if (!initiator || e.startMs > initiator.startMs) initiator = e
+      }
+    }
+    const triggered = entries.filter(
+      (e) => e.id !== entry.id && e.raw._initiator?.url === entry.url && e.startMs >= entry.startMs
+    )
+    return { initiator, triggered }
+  }, [entries, entry])
 
   const compression =
     entry.sizeBytes > 0 && entry.transferred > 0 && entry.transferred < entry.sizeBytes
@@ -44,7 +59,7 @@ export function OverviewTab({ entry }: { entry: NormalizedEntry }) {
         <div className="flex items-center gap-2">
           <CopyButton value={entry.url} label="Copy URL" />
           <CopyButton
-            value={`curl '${entry.url}' -X ${entry.method} ${entry.raw.request.headers.map((h) => `-H '${h.name}: ${h.value}'`).join(' ')}`}
+            value={toCurl(entry.method, entry.url, entry.raw.request.headers)}
             label="Copy as curl"
           />
         </div>
@@ -83,11 +98,7 @@ export function OverviewTab({ entry }: { entry: NormalizedEntry }) {
           <h3 className="label-eyebrow-strong">Request chain</h3>
           <div className="border-t border-border-soft">
             {initiator && (
-              <ChainRow
-                role="Requested by"
-                entry={initiator}
-                onJump={() => select(initiator.id)}
-              />
+              <ChainRow role="Requested by" entry={initiator} onJump={() => select(initiator.id)} />
             )}
             {triggered.slice(0, 8).map((t) => (
               <ChainRow key={t.id} role="Triggered" entry={t} onJump={() => select(t.id)} />

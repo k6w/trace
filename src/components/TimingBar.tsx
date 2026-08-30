@@ -1,7 +1,7 @@
 import type { NormalizedEntry } from '../lib/har'
 import { Tooltip } from '../ui/Tooltip'
 import { formatMs } from '../lib/format'
-import { PHASE_COLOR, PHASE_LABEL, PHASE_ORDER } from '../lib/phases'
+import { PHASE_COLOR, PHASE_LABEL, PHASE_ORDER, phaseSum } from '../lib/phases'
 
 interface Props {
   entry: NormalizedEntry
@@ -13,8 +13,9 @@ export function TimingBar({ entry, rangeStart, rangeEnd }: Props) {
   const span = Math.max(1, rangeEnd - rangeStart)
   const leadingPct = ((entry.startMs - rangeStart) / span) * 100
   const totalPct = (entry.totalMs / span) * 100
+  const measured = phaseSum(entry.phases)
 
-  if (entry.totalMs <= 0) {
+  if (entry.totalMs <= 0 || measured <= 0) {
     return (
       <div className="relative h-full w-full">
         <div
@@ -36,7 +37,7 @@ export function TimingBar({ entry, rangeStart, rangeEnd }: Props) {
           {PHASE_ORDER.map((phase) => {
             const ms = entry.phases[phase]
             if (ms <= 0) return null
-            const pct = Math.round((ms / entry.totalMs) * 100)
+            const pct = Math.round((ms / measured) * 100)
             return (
               <div key={phase} className="flex justify-between gap-4">
                 <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -71,7 +72,7 @@ export function TimingBar({ entry, rangeStart, rangeEnd }: Props) {
         >
           {PHASE_ORDER.map((phase) => {
             const ms = entry.phases[phase]
-            const pct = (ms / entry.totalMs) * 100
+            const pct = (ms / measured) * 100
             if (pct <= 0) return null
             return <span key={phase} style={{ width: `${pct}%`, background: PHASE_COLOR[phase] }} />
           })}

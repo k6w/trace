@@ -1,20 +1,31 @@
 import type { NormalizedEntry } from '../../lib/har'
 import { formatMs } from '../../lib/format'
-import { PHASE_COLOR, PHASE_DESCRIPTION, PHASE_LABEL, PHASE_ORDER, dominantPhase } from '../../lib/phases'
+import { PHASE_COLOR, PHASE_DESCRIPTION, PHASE_LABEL, PHASE_ORDER, dominantPhase, phaseSum } from '../../lib/phases'
 
 /* One request, drawn the way the waterfall draws it, then unpacked phase by
    phase. The bars are laid out cumulatively so each phase sits where it
    actually happened in the request, not flush-left like a bar chart. */
 export function PhaseBreakdown({ entry, compact = false }: { entry: NormalizedEntry; compact?: boolean }) {
-  const total = entry.totalMs || 1
   const lead = dominantPhase(entry.phases)
+  // Percentages are taken against the measured sum rather than the HAR's own
+  // `time`, so segments always add up to exactly the width of their track.
+  const measured = phaseSum(entry.phases)
+
+  if (measured <= 0) {
+    return (
+      <p className="font-mono text-[11px] text-muted-foreground">
+        No timing was recorded for this request
+        {entry.isCached ? ' — it was served from the cache.' : '.'}
+      </p>
+    )
+  }
 
   let cursor = 0
   const rows = PHASE_ORDER.map((p) => {
-    const ms = entry.phases[p] ?? 0
+    const ms = Math.max(0, entry.phases[p] ?? 0)
     const offset = cursor
     cursor += ms
-    return { phase: p, ms, offsetPct: (offset / total) * 100, widthPct: (ms / total) * 100 }
+    return { phase: p, ms, offsetPct: (offset / measured) * 100, widthPct: (ms / measured) * 100 }
   }).filter((r) => r.ms > 0)
 
   return (
@@ -31,11 +42,13 @@ export function PhaseBreakdown({ entry, compact = false }: { entry: NormalizedEn
       </div>
 
       <div className="flex items-baseline justify-between font-mono text-[11px] tabular">
-        <span className="text-muted-foreground">
-          Mostly{' '}
-          <span style={{ color: PHASE_COLOR[lead.phase] }}>{PHASE_LABEL[lead.phase].toLowerCase()}</span>
-          {' '}· {Math.round(lead.share * 100)}%
-        </span>
+        {lead ? (
+          <span className="text-muted-foreground">
+            Mostly{' '}
+            <span style={{ color: PHASE_COLOR[lead.phase] }}>{PHASE_LABEL[lead.phase].toLowerCase()}</span>
+            {' '}· {Math.round(lead.share * 100)}%
+          </span>
+        ) : <span />}
         <span className="text-foreground">{formatMs(entry.totalMs)}</span>
       </div>
 
@@ -50,7 +63,8 @@ export function PhaseBreakdown({ entry, compact = false }: { entry: NormalizedEn
                 <span className="h-2.5 w-2.5 shrink-0" style={{ background: PHASE_COLOR[r.phase] }} />
                 {PHASE_LABEL[r.phase]}
               </span>
-              <span className="relative h-2.5 bg-secondary" title={PHASE_DESCRIPTION[r.phase]}>
+              {/* overflow-hidden so a segment can never escape its own track. */}
+              <span className="relative h-2.5 overflow-hidden bg-secondary" title={PHASE_DESCRIPTION[r.phase]}>
                 <span
                   className="absolute inset-y-0"
                   style={{
